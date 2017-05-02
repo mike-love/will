@@ -11,6 +11,7 @@ JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
 
 class JIRAMixin(object):
     log = logging.getLogger(__name__)
+
     try:
         log.debug('Attempting to get mixin settings from configuraiton')
         default_user = settings.JIRA_USERNAME
@@ -22,7 +23,8 @@ class JIRAMixin(object):
                 JIRA_PASSWORD, and JIRA_SERVER.')
 
     def __init__(self, auth='basic'):
-        self.client = RESTClient.client(auth)
+        self.client = RESTClient.client(auth, self.app_root,
+                                        self.default_user, self.default_pass)
 
     def get_project(self, jira_key=None):
         """ return specific project information using the key param, or
@@ -44,42 +46,43 @@ class JIRAMixin(object):
         """get a list of project keys from jira
             :return list of keys
         """
-        key_list = (r.get('key') for r in self.get_project(jira_key=None)
+        key_list = (r.get('key') for r in self.get_project(jira_key=None))
 
-        self.log.info('Fetched keylist from %(server)s'\
-                       % {'server':self.app_root})
+        self.log.info('Fetched keylist from %(server)s' % {'server':self.app_root})
 
         return key_list
 
 
-    def get_issue(klass, proj_key, user=default_user, password=default_pass,
-                  issue_id=None):
+    def get_issue(self, proj_key, issue_id=None):
 
         """ get an issue from the jira project or return all issues for a
                 project if no key is specified
             :param proj_key: jira project key to retrieve the issue in
-            :param user: (optional): user to act as the submitter
-            :param password: (optional): password of the user acting
-                as submitter
             :param issue_id: (optional): issue key of a specific issue
                 to retrieve
             :return: json response object
         """
         if issue_id:
-            endpoint = JIRA_ISSUE_ENDPOINT % {'id': str(issue_id)}
-            klass.log.info('Getting issue %(issueid)s from %(server)s' \
-                    % {'issueid': issue_id, 'server': klass.app_root})
-
-            return klass._jira_request("GET", endpoint, user, password)
-
+            return self._get_one_issue(issue_id)
         else:
             endpoint = JIRA_SEARCH_ENDPOINT
             params = "jql=project=\"%s\"" % proj_key
             klass.log.info('Geting issues for query: %(query)s from %s(server)' \
                             % {'query': params, 'server': klass.app_root})
 
-            return klass._jira_paged_request("GET", endpoint, user, password,
+            return self._jira_paged_request("GET", endpoint, user, password,
                                              data_key='issues', params=params)
+
+    def _get_one_issue(self, issue_id):
+
+            endpoint = JIRA_ISSUE_ENDPOINT % {'id': str(issue_id)}
+            self.log.info('Getting issue %(issueid)s from %(server)s' \
+                    % {'issueid': issue_id, 'server': self.app_root})
+
+            return self.client.request("GET", endpoint)
+
+    def _get_many_issues(self):
+        pass
 
     def create_project(klass, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software", user=default_user,
