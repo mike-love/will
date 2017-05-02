@@ -85,6 +85,7 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
+
 class _RESTClient(object):
     url_pat = re.compile('(?P<scheme>https?:\/\/)?(?P<base>[\da-z\.-]+\.[a-z\.]{2,6}[\/\w \.-]*)\/?$')
 
