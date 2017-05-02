@@ -90,6 +90,39 @@ class JIRAMixin(object):
             return klass._jira_paged_request("GET", endpoint, user, password,
                                              data_key='issues', params=params)
 
+    def create_project(klass, proj_name, proj_key=None, proj_admin=None,
+                       proj_type="software", user=default_user,
+                       password=default_pass):
+
+        """create a project with the provided project name
+            :param proj_name: name of the project
+            :param proj_key: (optional) pre-defined jira project key; if not
+                provided one will be generated from the project name
+            :param proj_admin: (optional)jira username of the user to assign
+                as the admin on the project
+            :param proj_type: (optional) jira project type to create
+            :param user: (optional): user to act as the submitter
+            :param password: (optional): password of the user acting
+                as submitter
+            :return: json response object
+        """
+
+        if proj_key is None:
+            # Jira keys are maxed at 10 chars
+            proj_key = will_shared.key_gen(proj_name, 10,
+                                           klass.get_project_keys())
+
+        data = {"key": proj_key, "name": proj_name,
+                "projectTypeKey": proj_type,
+                "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
+                "lead": proj_admin}
+        endpoint = JIRA_PROJECT_ENDPOINT %{'id':''}
+        klass.log.info('Creating project: %(data)s' % {'data': data})
+        api_resp = klass._jira_request("POST", endpoint, user,
+                                       password, True, data=data)
+        logging.info('Response: \r\n %(resp)s' %{'resp': api_resp})
+        return api_resp
+
     def create_issue(self, jira_key, summary, description=None, priority=None,
                      issue_type='task'):
 
