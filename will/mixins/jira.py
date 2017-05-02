@@ -24,7 +24,7 @@ class JIRAMixin(object):
     def __init__(self, auth='basic'):
         self.client = RESTClient.client(auth)
 
-    def get_project(klass, jira_key=None):
+    def get_project(self, jira_key=None):
         """ return specific project information using the key param, or
             return all projects
 
@@ -40,19 +40,14 @@ class JIRAMixin(object):
         return self.client.request("GET", endpoint)
 
 
-    def get_project_keys(klass, user=default_user, password=default_pass):
+    def get_project_keys(self):
         """get a list of project keys from jira
-            :param user: (optional): user to use for authentication
-            :param password: (optional): password of the user for
-                authentication
             :return list of keys
         """
-        key_list = (r.get('key') for r in klass.get_project(jira_key=None,
-                                                            user=user,
-                                                            password=password))
+        key_list = (r.get('key') for r in self.get_project(jira_key=None)
 
-        klass.log.info('Fetched keylist from %(server)s'\
-                       % {'server':klass.app_root})
+        self.log.info('Fetched keylist from %(server)s'\
+                       % {'server':self.app_root})
 
         return key_list
 
