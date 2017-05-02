@@ -24,24 +24,20 @@ class JIRAMixin(object):
     def __init__(self, auth='basic'):
         self.client = RESTClient.client(auth)
 
-    def get_project(klass, jira_key=None, user=default_user,
-                    password=default_pass):
+    def get_project(klass, jira_key=None):
         """ return specific project information using the key param, or
             return all projects
 
             :param jira_key: jira project key to create the issue in
             :param summary: issue summary
-            :param user: (optional): user to act as the submitter
-            :param password: (optional): password of the user acting as
-                submitter
             :retun: json response object
         """
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': (str(jira_key or ''))}
-        klass.log.info('Getting project %(jira_key)s from %(server)s' \
-                       % {'jira_key': jira_key, 'server': klass.app_root})
+        self.log.info('Getting project %(jira_key)s from %(server)s' \
+                       % {'jira_key': jira_key, 'server': self.app_root})
 
-        return klass._jira_request("GET", endpoint, user, password)
+        return self.client.request("GET", endpoint)
 
 
     def get_project_keys(klass, user=default_user, password=default_pass):
