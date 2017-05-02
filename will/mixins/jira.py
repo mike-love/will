@@ -61,6 +61,35 @@ class JIRAMixin(object):
         return key_list
 
 
+    def get_issue(klass, proj_key, user=default_user, password=default_pass,
+                  issue_id=None):
+
+        """ get an issue from the jira project or return all issues for a
+                project if no key is specified
+            :param proj_key: jira project key to retrieve the issue in
+            :param user: (optional): user to act as the submitter
+            :param password: (optional): password of the user acting
+                as submitter
+            :param issue_id: (optional): issue key of a specific issue
+                to retrieve
+            :return: json response object
+        """
+        if issue_id:
+            endpoint = JIRA_ISSUE_ENDPOINT % {'id': str(issue_id)}
+            klass.log.info('Getting issue %(issueid)s from %(server)s' \
+                    % {'issueid': issue_id, 'server': klass.app_root})
+
+            return klass._jira_request("GET", endpoint, user, password)
+
+        else:
+            endpoint = JIRA_SEARCH_ENDPOINT
+            params = "jql=project=\"%s\"" % proj_key
+            klass.log.info('Geting issues for query: %(query)s from %s(server)' \
+                            % {'query': params, 'server': klass.app_root})
+
+            return klass._jira_paged_request("GET", endpoint, user, password,
+                                             data_key='issues', params=params)
+
     def create_issue(self, jira_key, summary, description=None, priority=None,
                      issue_type='task'):
 
