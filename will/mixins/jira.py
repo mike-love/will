@@ -43,6 +43,24 @@ class JIRAMixin(object):
 
         return klass._jira_request("GET", endpoint, user, password)
 
+
+    def get_project_keys(klass, user=default_user, password=default_pass):
+        """get a list of project keys from jira
+            :param user: (optional): user to use for authentication
+            :param password: (optional): password of the user for
+                authentication
+            :return list of keys
+        """
+        key_list = (r.get('key') for r in klass.get_project(jira_key=None,
+                                                            user=user,
+                                                            password=password))
+
+        klass.log.info('Fetched keylist from %(server)s'\
+                       % {'server':klass.app_root})
+
+        return key_list
+
+
     def create_issue(self, jira_key, summary, description=None, priority=None,
                      issue_type='task'):
 
