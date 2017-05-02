@@ -90,12 +90,14 @@ class _RESTClient(object):
 
     def __init__(self, base_url):
         self.base = base_url
+        self._sess = requests.Session()
 
     @property
     def base(self):
         return self._base
+
     @base.setter
-    def base(self,usr_base):
+    def base(self, usr_base):
         match = self.url_pat.match(usr_base.lower())
         if match:
             self._base = match.group('base')
@@ -106,10 +108,10 @@ class _RESTClient(object):
 
     def _uri_join(self, fragment):
         base = '/'.join(frag for frag in (self.base.split('/') + fragment.split('/')) if frag)
-        return ''.join([self.scheme,base])
+        return ''.join([self.scheme, base])
 
     def request(self, method, endpoint, raise_for_status=True,
-                 params={}, **kwargs):
+                params={}, **kwargs):
         """internal method of making requests"""
 
         url = self._uri_join(endpoint)
@@ -123,7 +125,10 @@ class _RESTClient(object):
         except:
             raise
 
+
 class _BasicRESTClient(_RESTClient):
+    """ RESTClient with Basic HTTP auth"""
+
     def __init__(self, base_url, username=None, password=None):
         super(_BasicRESTClient, self).__init__(base_url)
 
@@ -133,11 +138,19 @@ class _BasicRESTClient(_RESTClient):
         self._sess.headers['Content-Type'] = 'application/json'
         self._sess.auth = auth
 
+
 class RESTClient(object):
     @staticmethod
-    def client(auth,base_url, username=None, password=None):
+    def client(auth, base_url, username=None, password=None):
+        """ factory for rest client generation based on the require auth type
+            :param auth:
+            :param base_url:
+            :param username:
+            :param password:
+            :return _RESTClient
+        """
+
         if auth.lower() == 'basic':
-            return _BasicRESTClient(base_url,username,password)
+            return _BasicRESTClient(base_url, username, password)
         else:
             return None
-
