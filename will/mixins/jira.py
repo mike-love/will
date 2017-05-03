@@ -65,13 +65,7 @@ class JIRAMixin(object):
         if issue_id:
             return self._get_one_issue(issue_id)
         else:
-            endpoint = JIRA_SEARCH_ENDPOINT
-            params = "jql=project=\"%s\"" % proj_key
-            klass.log.info('Geting issues for query: %(query)s from %s(server)' \
-                            % {'query': params, 'server': klass.app_root})
-
-            return self._jira_paged_request("GET", endpoint, user, password,
-                                             data_key='issues', params=params)
+            return self_get_one_issue(issue_id)
 
     def _get_one_issue(self, issue_id):
 
@@ -82,7 +76,14 @@ class JIRAMixin(object):
             return self.client.request("GET", endpoint)
 
     def _get_many_issues(self):
-        pass
+
+        endpoint = JIRA_SEARCH_ENDPOINT
+        params = "jql=project=\"%s\"" % proj_key
+        klass.log.info('Geting issues for query: %(query)s from %s(server)' \
+                        % {'query': params, 'server': klass.app_root})
+
+        return self._jira_paged_request("GET", endpoint, user, password,
+                                         data_key='issues', params=params)
 
     def create_project(klass, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software", user=default_user,
