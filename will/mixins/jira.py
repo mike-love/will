@@ -39,7 +39,7 @@ class JIRAMixin(object):
         self.log.info('Getting project %(jira_key)s from %(server)s' \
                        % {'jira_key': jira_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint)
+        return self.client.request("GET", endpoint, cb=self.client.strip_data)
 
 
     def get_project_keys(self):
