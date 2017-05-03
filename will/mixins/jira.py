@@ -9,8 +9,9 @@ from ..utils import key_gen
 JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
 JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
 JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
+JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role"
 
-class JIRAMixin(object):
+class _JIRAMixin(object):
     log = logging.getLogger(__name__)
 
     try:
@@ -18,14 +19,17 @@ class JIRAMixin(object):
         default_user = settings.JIRA_USERNAME
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
+
+
     except AttributeError:
         log.error('Cannot find required settings in configuration provided')
         raise Exception('Parameter missing from configuration; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
 
     def __init__(self, auth='basic'):
-        self.client = RESTClient.client(auth, self.app_root,
-                                        self.default_user, self.default_pass)
+
+        self.client = RESTClient.client('basic', self.app_root,
+                                    self.default_user, self.default_pass)
 
     def get_project(self, jira_key=None):
         """ return specific project information using the key param, or
@@ -85,6 +89,12 @@ class JIRAMixin(object):
 
         return self._jira_paged_request("GET", endpoint, user, password,
                                          data_key='issues', params=params)
+
+    def get_project_roles(self, proj_key):
+        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id':proj_key}
+        self.log.info('Getting project roles for %(proj_key)s from %(server)s' \
+                % {'proj_key': proj_key, 'server': self.app_root})
+        return self.client.request("GET",endpoint, cb=self.client.strip_data)
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
@@ -150,3 +160,6 @@ class JIRAMixin(object):
         klass.log.info('Creating issue: %(data)s' % {'data': data})
 
         return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
+
+
+JIRAMixin = _JIRAMixin()
