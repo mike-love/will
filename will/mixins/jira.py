@@ -111,12 +111,13 @@ class JIRAMixin(object):
                 "projectTypeKey": proj_type,
                 "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
                 "lead": proj_admin}
+
         endpoint = JIRA_PROJECT_ENDPOINT %{'id':''}
-        klass.log.info('Creating project: %(data)s' % {'data': data})
-        api_resp = klass._jira_request("POST", endpoint, user,
-                                       password, True, data=data)
-        logging.info('Response: \r\n %(resp)s' %{'resp': api_resp})
-        return api_resp
+        self.log.info('Creating project: %(data)s' % {'data': data})
+
+        return self.client.request("POST", endpoint,cb=self.client.strip_data,
+                                   data=data)
+
 
     def create_issue(self, jira_key, summary, description=None, priority=None,
                      issue_type='task'):

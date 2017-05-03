@@ -87,6 +87,27 @@ def sizeof_fmt(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 
+def key_gen(name, key_len, existing_keys=None, appender=None):
+    """ generate a key from the name parameter
+        :param name: string from which to derive a project key;
+            usually name or title
+        :param key_len: maximum length of the key value
+        :param existing_keys: list of keys to ensure uniquness
+        :param appender(optional) integer to append if the key is not
+            unique
+        :return key
+    """
+    tmp_key = (re.sub('[^A-Z]', '', name)[:key_len-len(str(appender or ''))] +
+               str(appender or ''))
+
+    if existing_keys:
+        if tmp_key in existing_keys:
+            tmp_key = key_gen(name, key_len, existing_keys,
+                              appender=int(appender or 0)+1)
+
+    return tmp_key
+
+
 class _RESTClient(object):
     url_pat = re.compile('(?P<scheme>https?:\/\/)?(?P<base>[\da-z\.-]+\.[a-z\.]{2,6}[\/\w \.-]*)\/?$')
 
