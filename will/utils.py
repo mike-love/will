@@ -5,6 +5,7 @@ from HTMLParser import HTMLParser
 from requests.auth import HTTPBasicAuth
 import requests
 import re
+import json
 
 class Bunch(dict):
     def __init__(self, **kw):
@@ -112,7 +113,7 @@ class _RESTClient(object):
         return ''.join([self.scheme, base])
 
     def request(self, method, endpoint, raise_for_status=True,
-                params={}, **kwargs):
+                params={}, cb=None, **kwargs):
         """internal method of making requests"""
 
         url = self._uri_join(endpoint)
@@ -121,10 +122,20 @@ class _RESTClient(object):
 
             if raise_for_status:
                 r.raise_for_status()
+            if cb:
+                return cb(r)
+            else:
 
-            return r
+                return r
         except:
             raise
+
+    def strip_data(self, response):
+        if response.text:
+            return response.json()
+        else:
+            raise AttributeError
+
 
 
 class _BasicRESTClient(_RESTClient):
