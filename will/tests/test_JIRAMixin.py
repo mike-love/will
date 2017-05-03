@@ -63,3 +63,23 @@ class TestJIRAMixin(unittest.TestCase):
         r = self.client.get_project_keys()
         mock_call.assert_called_with(jira_key=None)
         self.assertEqual(['ABC','DEF','GH9'], list(r))
+
+    @patch('will.utils._RESTClient.request')
+    def test_create_project(self, mock_call):
+        data = [{'id':123, 'key':'ABC', 'name':'test1'}]
+
+        mock_call.return_value=json.dumps(data)
+        r = self.client.create_project('Test 1', 'ABC','user1')
+
+        calldata = {"key": "ABC",
+                    "name": "Test 1",
+                    "projectTypeKey": "software",
+                    "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
+                    "lead": "user1"}
+
+        mock_call.assert_called_with('POST',
+                                     '/rest/api/2/project/',
+                                     cb=self.client.client.strip_data,
+                                     data=calldata)
+
+        self.assertEqual(mock_call.return_value, r)

@@ -4,6 +4,7 @@ import re
 
 from will import settings
 from ..utils import RESTClient
+from ..utils import key_gen
 
 JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
 JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
@@ -85,9 +86,8 @@ class JIRAMixin(object):
         return self._jira_paged_request("GET", endpoint, user, password,
                                          data_key='issues', params=params)
 
-    def create_project(klass, proj_name, proj_key=None, proj_admin=None,
-                       proj_type="software", user=default_user,
-                       password=default_pass):
+    def create_project(self, proj_name, proj_key=None, proj_admin=None,
+                       proj_type="software"):
 
         """create a project with the provided project name
             :param proj_name: name of the project
@@ -104,8 +104,7 @@ class JIRAMixin(object):
 
         if proj_key is None:
             # Jira keys are maxed at 10 chars
-            proj_key = will_shared.key_gen(proj_name, 10,
-                                           klass.get_project_keys())
+            proj_key = key_gen(proj_name, 10, self.get_project_keys())
 
         data = {"key": proj_key, "name": proj_name,
                 "projectTypeKey": proj_type,
@@ -113,10 +112,10 @@ class JIRAMixin(object):
                 "lead": proj_admin}
 
         endpoint = JIRA_PROJECT_ENDPOINT %{'id':''}
-        self.log.info('Creating project: %(data)s' % {'data': data})
+        self.log.debug('Creating project: %(data)s' % {'data': data})
 
-        return self.client.request("POST", endpoint,cb=self.client.strip_data,
-                                   data=data)
+        return self.client.request("POST", endpoint,
+                                   cb=self.client.strip_data, data=data)
 
 
     def create_issue(self, jira_key, summary, description=None, priority=None,
