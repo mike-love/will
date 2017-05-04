@@ -9,7 +9,7 @@ from ..utils import key_gen
 JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
 JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
 JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
-JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role"
+JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role/%(roleid)s"
 
 class _JIRAMixin(object):
     log = logging.getLogger(__name__)
@@ -161,5 +161,16 @@ class _JIRAMixin(object):
 
         return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
 
+    def assign_project_role(self, user, proj_key, roleid):
+        """ assign a specific role to a user
+            :param user: user to assign the role to
+            :param proj_key: project key the user will recieve the role for
+            :param roleid: role id to assign to the user
+            :return json response
+            :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
+        """
+        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': roleid}
+
+        self.client.request("POST", JIRA_PROJ_ROLES_ENDPOIN)
 
 JIRAMixin = _JIRAMixin()
