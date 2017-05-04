@@ -7,7 +7,7 @@ from will import utils
 import json
 import pep8
 
-"""
+
 class TestJIRAMixinPEP8(unittest.TestCase):
     def setUp(self):
         pass
@@ -17,7 +17,7 @@ class TestJIRAMixinPEP8(unittest.TestCase):
         result = pep8style.check_files(['utils.py'])
         self.assertEqual(result.total_errors, 0,
                          'Found PEP8 complance issues/warnings.')
-"""
+
 class TestJIRAMixin(unittest.TestCase):
     def setUp(self):
         settings.JIRA_USERNAME = 'mlove'
