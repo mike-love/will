@@ -178,6 +178,6 @@ class _JIRAMixin(object):
         """
         endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': roleid}
 
-        self.client.request("POST", JIRA_PROJ_ROLES_ENDPOIN)
+        self.client.request("POST", JIRA_PROJ_ROLES_ENDPOINT)
 
 JIRAMixin = _JIRAMixin()
