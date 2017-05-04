@@ -31,19 +31,19 @@ class _JIRAMixin(object):
         self.client = RESTClient.client('basic', self.app_root,
                                     self.default_user, self.default_pass)
 
-    def get_project(self, jira_key=None):
+    def get_project(self, proj_key=None):
         """ return specific project information using the key param, or
             return all projects
 
-            :param jira_key: jira project key to create the issue in
+            :param proj_key: jira project key to create the issue in
             :param summary: issue summary
             :retun: json response object
             :JIRA URI: /rest/api/2/project/%(id)s
         """
 
-        endpoint = JIRA_PROJECT_ENDPOINT % {'id': (str(jira_key or ''))}
+        endpoint = JIRA_PROJECT_ENDPOINT % {'id': (str(proj_key or ''))}
         self.log.info('Getting project %(jira_key)s from %(server)s' \
-                       % {'jira_key': jira_key, 'server': self.app_root})
+                       % {'jira_key': proj_key, 'server': self.app_root})
 
         return self.client.request("GET", endpoint, cb=self.client.strip_data)
 
@@ -55,7 +55,7 @@ class _JIRAMixin(object):
             :JIRA URI: /rest/api/2/project/
         """
 
-        key_list = (r.get('key') for r in self.get_project(jira_key=None))
+        key_list = (r.get('key') for r in self.get_project(proj_key=None))
 
         self.log.info('Fetched keylist from %(server)s' % {'server':self.app_root})
 
@@ -143,11 +143,11 @@ class _JIRAMixin(object):
                                    cb=self.client.strip_data, data=data)
 
 
-    def create_issue(self, jira_key, summary, description=None, priority=None,
+    def create_issue(self, proj_key, summary, description=None, priority=None,
                      issue_type='task'):
         """ create an issue in the specified space
 
-            :param jira_key: jira project key to create the issue in
+            :param proj_key: jira project key to create the issue in
             :param summary: issue summary
             :param description: (optional): issue description
             :param priority: (optional): issue priority
@@ -156,7 +156,7 @@ class _JIRAMixin(object):
             :JIRA URI: /rest/api/2/issue/
         """
 
-        project = {"key": jira_key}
+        project = {"key": proj_key}
         issuetype = {"name": issue_type}
         data = {"fields": {"project": project, "summary": summary,
                 "description": description, "issuetype": issuetype}}
