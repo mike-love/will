@@ -177,7 +177,8 @@ class _JIRAMixin(object):
             :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
         """
         endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': roleid}
-
-        self.client.request("POST", JIRA_PROJ_ROLES_ENDPOINT)
+        data = {'user':[user]}
+        self.client.request("POST", JIRA_PROJ_ROLES_ENDPOINT, data=data,
+                            cb=self.client.strip_data)
 
 JIRAMixin = _JIRAMixin()
