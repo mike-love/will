@@ -11,6 +11,7 @@ JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
 JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
 JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role/%(roleid)s"
 
+
 class _JIRAMixin(object):
     log = logging.getLogger(__name__)
 
@@ -20,7 +21,6 @@ class _JIRAMixin(object):
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
 
-
     except AttributeError:
         log.error('Cannot find required settings in configuration provided')
         raise Exception('Parameter missing from configuration; JIRA requires JIRA_USERNAME, \
@@ -29,7 +29,7 @@ class _JIRAMixin(object):
     def __init__(self, auth='basic'):
 
         self.client = RESTClient.client('basic', self.app_root,
-                                    self.default_user, self.default_pass)
+                                        self.default_user, self.default_pass)
 
     def get_project(self, proj_key=None):
         """ return specific project information using the key param, or
@@ -42,11 +42,10 @@ class _JIRAMixin(object):
         """
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': (str(proj_key or ''))}
-        self.log.info('Getting project %(jira_key)s from %(server)s' \
-                       % {'jira_key': proj_key, 'server': self.app_root})
+        self.log.info('Getting project %(jira_key)s from %(server)s'
+                      % {'jira_key': proj_key, 'server': self.app_root})
 
         return self.client.request("GET", endpoint, cb=self.client.strip_data)
-
 
     def get_project_keys(self):
         """ get a list of project keys from jira
@@ -57,13 +56,12 @@ class _JIRAMixin(object):
 
         key_list = (r.get('key') for r in self.get_project(proj_key=None))
 
-        self.log.info('Fetched keylist from %(server)s' % {'server':self.app_root})
+        self.log.info('Fetched keylist from %(server)s'
+                      % {'server': self.app_root})
 
         return key_list
 
-
     def get_issue(self, proj_key, issue_id=None):
-
         """ get an issue from the jira project or return all issues for a
                 project if no key is specified
 
@@ -82,8 +80,8 @@ class _JIRAMixin(object):
     def _get_one_issue(self, issue_id):
 
             endpoint = JIRA_ISSUE_ENDPOINT % {'id': str(issue_id)}
-            self.log.info('Getting issue %(issueid)s from %(server)s' \
-                    % {'issueid': issue_id, 'server': self.app_root})
+            self.log.info('Getting issue %(issueid)s from %(server)s'
+                          % {'issueid': issue_id, 'server': self.app_root})
 
             return self.client.request("GET", endpoint)
 
@@ -91,11 +89,11 @@ class _JIRAMixin(object):
 
         endpoint = JIRA_SEARCH_ENDPOINT
         params = "jql=project=\"%s\"" % proj_key
-        klass.log.info('Geting issues for query: %(query)s from %s(server)' \
-                        % {'query': params, 'server': klass.app_root})
+        klass.log.info('Geting issues for query: %(query)s from %s(server)'
+                       % {'query': params, 'server': klass.app_root})
 
         return self._jira_paged_request("GET", endpoint, user, password,
-                                         data_key='issues', params=params)
+                                        data_key='issues', params=params)
 
     def get_project_roles(self, proj_key):
         """ retrieve roles available for a specific project
@@ -105,11 +103,11 @@ class _JIRAMixin(object):
             :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
         """
 
-        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id':proj_key, 'roleid':''}
-        self.log.info('Getting project roles for %(proj_key)s from %(server)s' \
-                % {'proj_key': proj_key, 'server': self.app_root})
+        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': ''}
+        self.log.info('Getting project roles for %(proj_key)s from %(server)s'
+                      % {'proj_key': proj_key, 'server': self.app_root})
 
-        return self.client.request("GET",endpoint, cb=self.client.strip_data)
+        return self.client.request("GET", endpoint, cb=self.client.strip_data)
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
@@ -136,12 +134,11 @@ class _JIRAMixin(object):
                 "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
                 "lead": proj_admin}
 
-        endpoint = JIRA_PROJECT_ENDPOINT %{'id':''}
+        endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
 
         return self.client.request("POST", endpoint,
                                    cb=self.client.strip_data, data=data)
-
 
     def create_issue(self, proj_key, summary, description=None, priority=None,
                      issue_type='task'):
@@ -161,7 +158,6 @@ class _JIRAMixin(object):
         data = {"fields": {"project": project, "summary": summary,
                 "description": description, "issuetype": issuetype}}
 
-
         klass.log.info('Creating issue: %(data)s' % {'data': data})
 
         return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
@@ -176,8 +172,9 @@ class _JIRAMixin(object):
             :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
         """
 
-        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': roleid}
-        data = {'user':[user]}
+        endpoint = (JIRA_PROJ_ROLES_ENDPOINT
+                   % {'id': proj_key, 'roleid': roleid})
+        data = {'user': [user]}
         self.client.request("POST", endpoint, data=data,
                             cb=self.client.strip_data)
 
