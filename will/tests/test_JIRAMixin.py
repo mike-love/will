@@ -115,3 +115,18 @@ class TestJIRAMixin(unittest.TestCase):
                                      '/rest/api/2/project/ABC123/role/',
                                      cb=JIRAMixin.client.strip_data)
         self.assertEqual(mock_call.return_value,r)
+
+
+    @patch('will.utils._RESTClient.request')
+    def test_assign_project_role(self, mock_call):
+
+        from will.mixins import JIRAMixin
+
+        proj_key = 'ABC123'
+
+        r = JIRAMixin.assign_project_role('user1', proj_key, '10002')
+
+        mock_call.assert_called_with('POST',
+                                     '/rest/api/2/project/ABC123/role/10002',
+                                     cb=JIRAMixin.client.strip_data,
+                                     data={'user:'['user1']})
