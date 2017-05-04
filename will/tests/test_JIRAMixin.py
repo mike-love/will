@@ -40,7 +40,7 @@ class TestJIRAMixin(unittest.TestCase):
                 {'id':456, 'key':'DEF', 'name':'test2'},
                 {'id':789, 'key':'GH9', 'name':'test3'}]
         mock_call.return_value=json.dumps(data)
-        r = JIRAMixin.get_project(jira_key=None)
+        r = JIRAMixin.get_project(proj_key=None)
         mock_call.assert_called_with('GET',
                                      '/rest/api/2/project/',
                                      cb=JIRAMixin.client.strip_data)
@@ -53,7 +53,7 @@ class TestJIRAMixin(unittest.TestCase):
         from will.mixins import JIRAMixin
         data = [{'id':123, 'key':'ABC', 'name':'test1'}]
         mock_call.return_value=json.dumps(data)
-        r = JIRAMixin.get_project(jira_key='ABC')
+        r = JIRAMixin.get_project(proj_key='ABC')
         mock_call.assert_called_with('GET',
                                      '/rest/api/2/project/ABC',
                                      cb=JIRAMixin.client.strip_data)
@@ -72,7 +72,7 @@ class TestJIRAMixin(unittest.TestCase):
         mock_call.return_value=data
 
         r = JIRAMixin.get_project_keys()
-        mock_call.assert_called_with(jira_key=None)
+        mock_call.assert_called_with(proj_key=None)
         self.assertEqual(['ABC','DEF','GH9'], list(r))
 
     @patch('will.utils._RESTClient.request')
