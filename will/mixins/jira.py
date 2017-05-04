@@ -38,6 +38,7 @@ class _JIRAMixin(object):
             :param jira_key: jira project key to create the issue in
             :param summary: issue summary
             :retun: json response object
+            :JIRA URI: /rest/api/2/project/%(id)s
         """
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': (str(jira_key or ''))}
@@ -48,9 +49,12 @@ class _JIRAMixin(object):
 
 
     def get_project_keys(self):
-        """get a list of project keys from jira
+        """ get a list of project keys from jira
+
             :return list of keys
+            :JIRA URI: /rest/api/2/project/
         """
+
         key_list = (r.get('key') for r in self.get_project(jira_key=None))
 
         self.log.info('Fetched keylist from %(server)s' % {'server':self.app_root})
@@ -62,11 +66,14 @@ class _JIRAMixin(object):
 
         """ get an issue from the jira project or return all issues for a
                 project if no key is specified
+
             :param proj_key: jira project key to retrieve the issue in
             :param issue_id: (optional): issue key of a specific issue
                 to retrieve
             :return: json response object
+            :JIRA URI: /rest/api/2/issue/%(id)s
         """
+
         if issue_id:
             return self._get_one_issue(issue_id)
         else:
@@ -92,7 +99,8 @@ class _JIRAMixin(object):
 
     def get_project_roles(self, proj_key):
         """ retrieve roles available for a specific project
-            param proj_key: jira project to retrieve the roles from
+
+            :param proj_key: jira project to retrieve the roles from
             :return: json response object
             :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
         """
@@ -105,8 +113,8 @@ class _JIRAMixin(object):
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
+        """ create a project with the provided project name
 
-        """create a project with the provided project name
             :param proj_name: name of the project
             :param proj_key: (optional) pre-defined jira project key; if not
                 provided one will be generated from the project name
@@ -137,25 +145,15 @@ class _JIRAMixin(object):
 
     def create_issue(self, jira_key, summary, description=None, priority=None,
                      issue_type='task'):
-
         """ create an issue in the specified space
+
             :param jira_key: jira project key to create the issue in
             :param summary: issue summary
             :param description: (optional): issue description
             :param priority: (optional): issue priority
             :param issue_type: (optional): issue type to create
             :return: json response object
-            {"fields": {
-                project":{
-                    "key": "TEST"
-                },
-                "summary": "REST ye merry gentlemen.",
-                "description": "Creating of an issue using project
-                                 and issue type names using the REST API",
-                "issuetype": {
-                    "name": "Bug"
-                }
-            }}
+            :JIRA URI: /rest/api/2/issue/
         """
 
         project = {"key": jira_key}
@@ -170,12 +168,14 @@ class _JIRAMixin(object):
 
     def assign_project_role(self, user, proj_key, roleid):
         """ assign a specific role to a user
+
             :param user: user to assign the role to
             :param proj_key: project key the user will recieve the role for
             :param roleid: role id to assign to the user
             :return json response
             :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
         """
+
         endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id': proj_key, 'roleid': roleid}
         data = {'user':[user]}
         self.client.request("POST", endpoint, data=data,
