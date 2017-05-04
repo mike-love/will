@@ -129,4 +129,4 @@ class TestJIRAMixin(unittest.TestCase):
         mock_call.assert_called_with('POST',
                                      '/rest/api/2/project/ABC123/role/10002',
                                      cb=JIRAMixin.client.strip_data,
-                                     data={'user:'['user1']})
+                                     data={'user':['user1']})
