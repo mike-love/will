@@ -14,7 +14,7 @@ class TestJIRAMixinPEP8(unittest.TestCase):
 
     def test_PEP8Compliance(self):
         pep8style = pep8.StyleGuide()
-        result = pep8style.check_files(['utils.py'])
+        result = pep8style.check_files(['mixins/jira.py'])
         self.assertEqual(result.total_errors, 0,
                          'Found PEP8 complance issues/warnings.')
 
