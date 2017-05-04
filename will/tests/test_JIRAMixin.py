@@ -112,6 +112,6 @@ class TestJIRAMixin(unittest.TestCase):
         r = JIRAMixin.get_project_roles(proj_key)
 
         mock_call.assert_called_with('GET',
-                                     '/rest/api/2/project/ABC123/role',
+                                     '/rest/api/2/project/ABC123/role/',
                                      cb=JIRAMixin.client.strip_data)
         self.assertEqual(mock_call.return_value,r)
