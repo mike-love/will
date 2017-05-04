@@ -91,9 +91,16 @@ class _JIRAMixin(object):
                                          data_key='issues', params=params)
 
     def get_project_roles(self, proj_key):
-        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id':proj_key}
+        """ retrieve roles available for a specific project
+            param proj_key: jira project to retrieve the roles from
+            :return: json response object
+            :JIRA URI: /rest/api/2/project/%(id)s/role/%(roleid)s
+        """
+
+        endpoint = JIRA_PROJ_ROLES_ENDPOINT % {'id':proj_key, 'roleid':''}
         self.log.info('Getting project roles for %(proj_key)s from %(server)s' \
                 % {'proj_key': proj_key, 'server': self.app_root})
+
         return self.client.request("GET",endpoint, cb=self.client.strip_data)
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
