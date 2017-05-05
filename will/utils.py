@@ -2,7 +2,9 @@
 from clint.textui import puts, indent
 from clint.textui import colored
 from HTMLParser import HTMLParser
-
+from requests.auth import HTTPBasicAuth
+import requests
+import re
 
 class Bunch(dict):
     def __init__(self, **kw):
@@ -82,3 +84,74 @@ def sizeof_fmt(num, suffix='B'):
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+class _RESTClient(object):
+    url_pat = re.compile('(?P<scheme>https?:\/\/)?(?P<base>[\da-z\.-]+\.[a-z\.]{2,6}[\/\w \.-]*)\/?$')
+
+    def __init__(self, base_url):
+        self.base = base_url
+        self._sess = requests.Session()
+
+    @property
+    def base(self):
+        return self._base
+
+    @base.setter
+    def base(self, usr_base):
+        match = self.url_pat.match(usr_base.lower())
+        if match:
+            self._base = match.group('base')
+            self.scheme = match.group('scheme') if match.group('scheme') else 'http://'
+        else:
+            # want to through an error eventually
+            pass
+
+    def _uri_join(self, fragment):
+        base = '/'.join(frag for frag in (self.base.split('/') + fragment.split('/')) if frag)
+        return ''.join([self.scheme, base])
+
+    def request(self, method, endpoint, raise_for_status=True,
+                params={}, **kwargs):
+        """internal method of making requests"""
+
+        url = self._uri_join(endpoint)
+        try:
+            r = self._sess.request(method=method, url=url, **kwargs)
+
+            if raise_for_status:
+                r.raise_for_status()
+
+            return r
+        except:
+            raise
+
+
+class _BasicRESTClient(_RESTClient):
+    """ RESTClient with Basic HTTP auth"""
+
+    def __init__(self, base_url, username=None, password=None):
+        super(_BasicRESTClient, self).__init__(base_url)
+
+        if username and password:
+            auth = HTTPBasicAuth(username, password)
+        self._sess = requests.Session()
+        self._sess.headers['Content-Type'] = 'application/json'
+        self._sess.auth = auth
+
+
+class RESTClient(object):
+    @staticmethod
+    def client(auth, base_url, username=None, password=None):
+        """ factory for rest client generation based on the require auth type
+            :param auth:
+            :param base_url:
+            :param username:
+            :param password:
+            :return _RESTClient
+        """
+
+        if auth.lower() == 'basic':
+            return _BasicRESTClient(base_url, username, password)
+        else:
+            return None
