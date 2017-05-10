@@ -4,12 +4,12 @@ import logging
 import settings
 from bottle import request
 from mixins import NaturalTimeMixin, RosterMixin, RoomMixin, ScheduleMixin, HipChatMixin, StorageMixin, SettingsMixin, \
-    EmailMixin
+    EmailMixin, JIRAMixin
 from utils import html_to_text
 
 
 class WillPlugin(EmailMixin, StorageMixin, NaturalTimeMixin, RoomMixin, RosterMixin,
-                 ScheduleMixin, HipChatMixin, SettingsMixin):
+                 ScheduleMixin, HipChatMixin, SettingsMixin, JIRAMixin):
     is_will_plugin = True
     request = request
 
