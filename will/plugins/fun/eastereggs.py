@@ -66,10 +66,11 @@ class EasterEggPlugin(WillPlugin):
     def easter_egg(self, message):
         self.reply(message, "You've got to try harder then that")
 
-    @respond_to(".*?(make me a sandwich)"):
-        self.reply(message, "What? Make it yourself.")
+    @respond_to("^(make me a sandwich).*$")
+    def sandwich(self, message):
+        self.reply(message, "What? Make it yourself.\r\n https://imgs.xkcd.com/comics/sandwich.png")
 
-    @respond_to(".*?(sudo make me a sandwich)"):
-        self.reply(message, "Okay; \r\n \
-                ")
+    @respond_to("^(sudo make me a sandwich).*$")
+    def sudo_sandwich(self, message):
+        self.reply(message, "Okay; \r\n https://upload.wikimedia.org/wikipedia/commons/e/e6/BLT_sandwich_on_toast.jpg")
 
