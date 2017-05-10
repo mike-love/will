@@ -12,7 +12,7 @@ JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
 JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role/%(roleid)s"
 
 
-class _JIRAMixin(object):
+class JIRAMixin(object):
     log = logging.getLogger(__name__)
 
     try:
@@ -21,15 +21,12 @@ class _JIRAMixin(object):
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
 
+        client = RESTClient.client('basic', app_root,
+                                        default_user, default_pass)
     except AttributeError:
         log.error('Cannot find required settings in configuration provided')
         raise Exception('Parameter missing from configuration; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
-
-    def __init__(self, auth='basic'):
-
-        self.client = RESTClient.client('basic', self.app_root,
-                                        self.default_user, self.default_pass)
 
     def get_project(self, proj_key=None):
         """ return specific project information using the key param, or
@@ -178,4 +175,3 @@ class _JIRAMixin(object):
         self.client.request("POST", endpoint, data=data,
                             cb=self.client.strip_data)
 
-JIRAMixin = _JIRAMixin()
