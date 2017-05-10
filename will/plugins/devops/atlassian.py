@@ -13,5 +13,15 @@ import re
 
 
 class AtlassianPlugin(WillPlugin):
-    pass
+
+    @require_settings("JIRA_USERNAME", "JIRA_PASSWORD", "JIRA_SERVER")
+    @respond_to("\bcreate \b(?P<project_type>.*)?\bproject\b (?P<project_name>.*).*$")
+    def create_project(self, message, project_type, project_name):
+        try:
+            r = self.create_project(project_name)
+        except:
+
+
+            self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
+                       % r['key', project_name, r['id'])
 
