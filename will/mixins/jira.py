@@ -118,7 +118,8 @@ class JIRAMixin(object):
             self.log.info('Getting %(userid)s from %(server)s'
                           % {'userid': user, 'server': self.app_root})
 
-            return self.client.request("GET", endpoint, params=params)
+            return self.client.request("GET", endpoint, cb=self.client.strip_data,
+                                       params=params)
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
