@@ -10,7 +10,7 @@ JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
 JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
 JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
 JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role/%(roleid)s"
-
+JIRA_USER_ENDPOINT = "/rest/api/2/user"
 
 class JIRAMixin(object):
     log = logging.getLogger(__name__)
@@ -105,6 +105,20 @@ class JIRAMixin(object):
                       % {'proj_key': proj_key, 'server': self.app_root})
 
         return self.client.request("GET", endpoint, cb=self.client.strip_data)
+
+
+    def get_user(self, user):
+        """ get user details
+            :param user: username of the record to return
+
+        """
+            endpoint = JIRA_USER_ENDPOINT
+            params = {'username': user}
+
+            self.log.info('Getting %(userid)s from %(server)s'
+                          % {'userid': user, 'server': self.app_root})
+
+            return self.client.request("GET", endpoint, params=params)
 
     def create_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
