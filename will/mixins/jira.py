@@ -125,10 +125,10 @@ class JIRAMixin(object):
         """ create a project with the provided project name
 
             :param proj_name: name of the project
+            :param proj_admin: jira username of the user to assign
+                as the admin on the project
             :param proj_key: (optional) pre-defined jira project key; if not
                 provided one will be generated from the project name
-            :param proj_admin: (optional)jira username of the user to assign
-                as the admin on the project
             :param proj_type: (optional) jira project type to create
             :param user: (optional): user to act as the submitter
             :param password: (optional): password of the user acting
@@ -140,10 +140,10 @@ class JIRAMixin(object):
             # Jira keys are maxed at 10 chars
             proj_key = key_gen(proj_name, 10, self.get_jira_project_keys())
 
-        data = {"key": proj_key, "name": proj_name,
+        data = json.dumps({"key": proj_key, "name": proj_name,
                 "projectTypeKey": proj_type,
                 "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
-                "lead": proj_admin}
+                "lead": proj_admin})
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
