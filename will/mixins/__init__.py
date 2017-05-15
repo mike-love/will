@@ -9,3 +9,4 @@ from schedule import ScheduleMixin
 from settings import SettingsMixin
 from storage import StorageMixin
 from jira import JIRAMixin
+from confluence import ConfluenceMixin
