@@ -31,7 +31,7 @@ class _JIRAMixin(object):
         self.client = RESTClient.client('basic', self.app_root,
                                         self.default_user, self.default_pass)
 
-    def get_project(self, proj_key=None):
+    def get_jira_project(self, proj_key=None):
         """ return specific project information using the key param, or
             return all projects
 
@@ -47,14 +47,14 @@ class _JIRAMixin(object):
 
         return self.client.request("GET", endpoint, cb=self.client.strip_data)
 
-    def get_project_keys(self):
+    def get_jira_project_keys(self):
         """ get a list of project keys from jira
 
             :return list of keys
             :JIRA URI: /rest/api/2/project/
         """
 
-        key_list = (r.get('key') for r in self.get_project(proj_key=None))
+        key_list = (r.get('key') for r in self.get_jira_project(proj_key=None))
 
         self.log.info('Fetched keylist from %(server)s'
                       % {'server': self.app_root})
@@ -95,7 +95,7 @@ class _JIRAMixin(object):
         return self._jira_paged_request("GET", endpoint, user, password,
                                         data_key='issues', params=params)
 
-    def get_project_roles(self, proj_key):
+    def get_jira_project_roles(self, proj_key):
         """ retrieve roles available for a specific project
 
             :param proj_key: jira project to retrieve the roles from
@@ -109,7 +109,7 @@ class _JIRAMixin(object):
 
         return self.client.request("GET", endpoint, cb=self.client.strip_data)
 
-    def create_project(self, proj_name, proj_key=None, proj_admin=None,
+    def create_jira_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software"):
         """ create a project with the provided project name
 
@@ -127,7 +127,7 @@ class _JIRAMixin(object):
 
         if proj_key is None:
             # Jira keys are maxed at 10 chars
-            proj_key = key_gen(proj_name, 10, self.get_project_keys())
+            proj_key = key_gen(proj_name, 10, self.get_jira_project_keys())
 
         data = {"key": proj_key, "name": proj_name,
                 "projectTypeKey": proj_type,
@@ -162,7 +162,7 @@ class _JIRAMixin(object):
 
         return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
 
-    def assign_project_role(self, user, proj_key, roleid):
+    def assign_jira_project_role(self, user, proj_key, roleid):
         """ assign a specific role to a user
 
             :param user: user to assign the role to
