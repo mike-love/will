@@ -111,14 +111,14 @@ class JIRAMixin(object):
             :param user: username of the record to return
 
         """
-            endpoint = JIRA_USER_ENDPOINT
-            params = {'username': user}
+        endpoint = JIRA_USER_ENDPOINT
+        params = {'username': user}
 
-            self.log.info('Getting %(userid)s from %(server)s'
-                          % {'userid': user, 'server': self.app_root})
+        self.log.info('Getting %(userid)s from %(server)s'
+                      % {'userid': user, 'server': self.app_root})
 
-            return self.client.request("GET", endpoint, cb=self.client.strip_data,
-                                       params=params)
+        return self.client.request("GET", endpoint, cb=self.client.strip_data,
+                                   params=params)
 
     def create_jira_project(self, proj_name, proj_key=None, proj_admin=None,
                        proj_type="software", proj_template_key=None):
