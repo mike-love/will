@@ -19,7 +19,7 @@ class AtlassianPlugin(WillPlugin):
         user_prof = self.get_hipchat_user(self, user_id)
 
         if user_prof.get('email'):
-            tmp_un = user_prof['email'].split('@')[0]]
+            tmp_un = user_prof['email'].split('@')[0]
             if self._is_valid_user(tmp_un):
                 proj_admin = tmp_un
             else:
