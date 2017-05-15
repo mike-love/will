@@ -138,7 +138,7 @@ class HipChatMixin(object):
         headers = {'Content-type': 'application/json'}
         try:
             r = requests.post(url, data=data, params=params, headers=headers,
-                              ***settings.REQUESTS_OPTIONS)
+                              **settings.REQUESTS_OPTIONS)
             if r.text:
                 return r.json()
 
