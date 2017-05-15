@@ -31,7 +31,8 @@ class AtlassianPlugin(WillPlugin):
         self.reply(message, "ok creating project %s with %s as project lead" % project_name)
 
         try:
-            r = self.create_jira_project(project_name,'mlove')
+            r = self.create_jira_project(project_name,'mlove',
+                    proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
 
             self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
                    % (r['key'], project_name, r['id']))
