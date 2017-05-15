@@ -121,7 +121,7 @@ class JIRAMixin(object):
                                        params=params)
 
     def create_jira_project(self, proj_name, proj_key=None, proj_admin=None,
-                            proj_type="software"):
+                       proj_type="software", proj_template_key=None):
         """ create a project with the provided project name
 
             :param proj_name: name of the project
@@ -130,9 +130,8 @@ class JIRAMixin(object):
             :param proj_key: (optional) pre-defined jira project key; if not
                 provided one will be generated from the project name
             :param proj_type: (optional) jira project type to create
-            :param user: (optional): user to act as the submitter
-            :param password: (optional): password of the user acting
-                as submitter
+            :param proj_template_key: (optional) jira template key to use as
+                as the tempate for creating the project
             :return: json response object
         """
 
@@ -141,9 +140,10 @@ class JIRAMixin(object):
             proj_key = key_gen(proj_name, 10, self.get_jira_project_keys())
 
         data = json.dumps({"key": proj_key, "name": proj_name,
-                "projectTypeKey": proj_type,
-                "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
-                "lead": proj_admin})
+                "projectTypeKey": proj_type, "lead": proj_admin})
+
+        if proj_template_key:
+            data['projectTemplateKey'] = project_template_key
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
