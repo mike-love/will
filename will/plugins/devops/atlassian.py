@@ -31,7 +31,7 @@ class AtlassianPlugin(WillPlugin):
         self.reply(message, "ok creating project %s with %s as project lead" % project_name)
 
         try:
-            r = self.create_project(project_name,'mlove')
+            r = self.create_jira_project(project_name,'mlove')
 
             self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
                    % (r['key'], project_name, r['id']))
