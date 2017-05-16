@@ -140,6 +140,8 @@ class HipChatMixin(object):
             r = requests.post(url, data=data, params=params, headers=headers,
                               **settings.REQUESTS_OPTIONS)
             if r.text:
+                logging.debug('Endpoint %(endpoint)s response: \r\n %(resp)s'
+                              %{'endpoint': url, 'resp': r.text})
                 return r.json()
 
         except:
