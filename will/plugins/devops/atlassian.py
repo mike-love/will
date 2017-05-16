@@ -1,5 +1,5 @@
 # coding: utf-8
-from will.utils import show_valid, error, warn, print_head
+from will.utils import show_valid, error, warn, print_head, key_gen
 
 from will.plugin import WillPlugin
 from will.decorators import (respond_to, hear, randomly, route, rendered_template,
@@ -16,7 +16,7 @@ class AtlassianPlugin(WillPlugin):
 
     @respond_to("create(?P<project_type>.*)?project(?P<project_name>.*)")
     def will_create_project(self, message, project_type, project_name):
-        user_prof = self.get_hipchat_user(self, user_id)
+        user_prof = self.get_hipchat_user(self, message.sender.nick['email'])
 
         if user_prof.get('email'):
             tmp_un = user_prof['email'].split('@')[0]
@@ -31,14 +31,45 @@ class AtlassianPlugin(WillPlugin):
         self.reply(message, "ok creating project %s with %s as project lead" % project_name)
 
         try:
-            r = self.create_jira_project(project_name,'mlove',
-                    proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
+            hc = self.create_hipchat_room(project_name, owner=message.sender.nick['email'])
+            self.reply(message, "created hipchat room %(room)%s" %{room: hc.get('name')})
+        except:
+            raise
+
+        try:
+            j_resp = self.create_jira_project(project_name, proj_admin,
+                                              proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
 
             self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
-                   % (r['key'], project_name, r['id']))
+                   % (j_resp['key'], project_name, j_resp['id']))
         except:
 
             raise
+
+        try:
+            # try to reuse the jira key if it's not already assigned in confluence
+            if j_resp['key'] in self.get_space_keys():
+                space_key = key_gen(project_name, 255, self.get_space_keys())
+            else:
+                space_key = j_resp['key']
+
+            context_elem = {"jira-server": "6028ff00-2ed7-3998-8913-344d65267cba",
+                        "jira-project": j_resp['id'], "name": project_name,
+                        "spaceKey": space_key, "description":"",
+                        "noPageTitlePrefix":"true", "alt_token":"undefined",
+                        "jira-server-id": "6028ff00-2ed7-3998-8913-344d65267cba",
+                        "project-key": j_resp['key'], "project-name": project_name,
+                        "ContentPageTitle": project_name}
+
+            c_resp = self.create_space(project_name, space_key=space_key,
+                                       space_admin=proj_admin, blueprint=True,
+                                       context_element=context_element,
+                                       blueprint_id="22dd1292-0487-406b-9c89-d342e6d7e8cd")
+            self.reply(message, 'Created atlassian project %(name)' % {'name': project_name})
+        except:
+            raise
+
+
 
     def _is_valid_user(self, userid):
         """checks if the user is a valid user"""
