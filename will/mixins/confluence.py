@@ -70,7 +70,7 @@ class ConfluenceMixin(object):
 
         return self.client.request("GET", endpoint)
 
-    def create_space(self, space_key=None, description=None,
+    def create_space(self, space_name, space_key=None, description=None,
                      space_admin=None, blueprint=False, **kwargs):
 
         """
