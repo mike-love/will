@@ -23,6 +23,7 @@ class AtlassianPlugin(WillPlugin):
             if self._is_valid_user(tmp_un):
                 logging.debug('Could not find user %(user)s in %(server)s'
                               % {'user': tmp_un, 'server': settings.JIRA_SERVER})
+
                 proj_admin = tmp_un
             else:
                 proj_admin = settings.JIRA_USERNAME
@@ -35,7 +36,7 @@ class AtlassianPlugin(WillPlugin):
 
         try:
             hc = self.create_hipchat_room(project_name, owner=message.sender.nick)
-            self.reply(message, "created hipchat room %(room)%s" %{'room': hc.get('name')})
+            self.reply(message, "created hipchat room %(room)s" %{'room': hc.get('name')})
         except:
             raise
 
