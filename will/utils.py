@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth
 import requests
 import re
 import json
+import logging
 
 class Bunch(dict):
     def __init__(self, **kw):
