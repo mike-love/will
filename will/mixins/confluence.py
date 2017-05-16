@@ -96,7 +96,7 @@ class ConfluenceMixin(object):
             # do blueprint things
 
 
-            data = {"spaceKey": space_key, "name": project_name,
+            data = {"spaceKey": space_key, "name": space_name,
                     "description": description,
                     "spaceBlueprintId": kwargs.get('blueprint_id'),
                     "context": kwargs.get('context_element')}
