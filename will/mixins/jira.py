@@ -141,11 +141,11 @@ class JIRAMixin(object):
             proj_key = key_gen(proj_name, 10, self.jira_key_exists)
             logging.debug('Generated Jira Project Key: %s' % proj_key)
 
-        data = json.dumps({"key": proj_key, "name": proj_name,
-                "projectTypeKey": proj_type, "lead": proj_admin})
+        data = {"key": proj_key, "name": proj_name,
+                "projectTypeKey": proj_type, "lead": proj_admin}
 
         if proj_template_key:
-            data['projectTemplateKey'] = project_template_key
+            data['projectTemplateKey'] = proj_template_key
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
