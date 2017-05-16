@@ -12,7 +12,7 @@ SET_TOPIC_URL = "https://%(server)s/v2/room/%(room_id)s/topic?auth_token=%(token
 USER_DETAILS_URL = "https://%(server)s/v2/user/%(user_id)s?auth_token=%(token)s"
 ALL_USERS_URL = ("https://%(server)s/v2/user?auth_token=%(token)s&start-index"
                  "=%(start_index)s&max-results=%(max_results)s")
-
+ROOM_URL = "https://%(server)s/v2/room"
 
 class HipChatMixin(object):
 
@@ -117,3 +117,30 @@ class HipChatMixin(object):
 
             self._full_hipchat_user_list = full_roster
         return self._full_hipchat_user_list
+
+    def create_hipchat_room(self, room_name, privacy='public', owner=None,
+                            guest_access = False):
+        """ create a new hipchat room
+            :param room_name: name of the room
+            :param privacy: (optional) whether the room is accessible to other users
+                            or not
+            :param owner_user_id: (optional) the id, email address, or mention
+                                name (beginning with an '@') of the room's owner.
+                                Defaults to the current user
+            :param guest_access: (optional) whether or not guests have access
+                                to the room
+            :response json:
+        """
+        url = ROOM_URL % {"server": settings.HIPCHAT_SERVER}
+        data = json.dumps({'name': room_name, 'privacy': privacy, 'owner_user_id': owner,
+            'guest_access': guest_access})
+        params = {'auth_token': settings.V2_TOKEN}
+        headers = {'Content-type': 'application/json'}
+        try:
+            r = requests.post(url, data=data, params=params, headers=headers,
+                              **settings.REQUESTS_OPTIONS)
+            if r.text:
+                return r.json()
+
+        except:
+            raise

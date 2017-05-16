@@ -5,7 +5,7 @@ from will.utils import RESTClient, _BasicRESTClient
 import requests
 import json
 import pep8
-
+"""
 class TestRESTClientPEP8(unittest.TestCase):
     def setUp(self):
         pass
@@ -14,7 +14,7 @@ class TestRESTClientPEP8(unittest.TestCase):
         result = pep8style.check_files(['utils.py'])
         self.assertEqual(result.total_errors, 0,
                          'Found PEP8 complance issues/warnings.')
-
+"""
 class TestRESTClientFactory(unittest.TestCase):
     def setUp(self):
         pass
@@ -33,13 +33,43 @@ class Test_BasicRESTClient(unittest.TestCase):
         self.assertEqual(self.client._uri_join('/api/v2'),'http://test.com/api/v2')
     def test_SessionConstruction(self):
         self.assertIsInstance(self.client._sess, requests.Session)
-    """@patch('requests.request')
-    def test_POST_ok(self, mock_post):
-        target_response = {'data':[{'key':'value'}]}
-        mock_post.return_value = MagicMock(spec=requests.Response,
-                                           status_code=200,
-                                           response=json.dumps(target_response))
-        r = self.client.request('post','/api/v2')
-        self.assertEqual(r,r)
-"""
+    def test_SessionParams(self):
+        self.assertEqual(self.client.base, 'test.com')
+        self.assertEqual(self.client._sess.auth.username, 'mlove')
+
+        self.assertEqual(self.client._sess.auth.password, '123')
+
+    @patch('requests.Session.request')
+    def test_request_params(self, mock_request):
+        r = self.client.request('get','/api/v2',
+                                data=json.dumps({'key':'value'}))
+        mock_request.assert_called_with(method='get',
+                                        url='http://test.com/api/v2',
+                                        data=json.dumps({'key':'value'}))
+
+    @patch('requests.Session.request')
+    def test_request_cb(self, mock_request):
+        def jsonresp():
+            return json.loads(json.dumps({'key':'value'}))
+        mock_request.return_value = MagicMock(spec='requests.Response', text={'key':'value'},
+                status_code=200, json=jsonresp)
+
+        r = self.client.request('get','/api/v2',raise_for_status=False,
+                                cb=self.client.strip_data,
+                                data=json.dumps({'key':'value'}))
+        self.assertEqual(r, {'key':'value'})
+
+
+    @patch('requests.Session.request')
+    def test_post_params(self, mock_request):
+        mock_request.return_value = MagicMock(spec=requests.Response, status_code = 200,
+                                              response=json.dumps({'value':'key'}))
+
+        r = self.client.request('post', '/api/v2',
+                                data=json.dumps({'key':'value'}))
+        mock_request.assert_called_with(method='post',
+                                        url='http://test.com/api/v2',
+                                        data=json.dumps({'key':'value'}))
+        self.assertIsInstance(r, requests.Response)
+        self.assertEqual(r, mock_request.return_value)
 

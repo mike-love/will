@@ -22,4 +22,4 @@ Will has docs, including a quickstart and lots of screenshots at:
 Check them out!
 
 
-**Next Release** 0.9.4 is scheduled for April 25, 2017.  Please test your integrations against master, and report any bugs!
+**Big Update:** I've just posted the [roadmap and future direction](https://github.com/skoczen/will/issues/257) for will.  Your thoughts are welcome!!
