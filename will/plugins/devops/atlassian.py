@@ -28,7 +28,8 @@ class AtlassianPlugin(WillPlugin):
             proj_admin = settings.JIRA_USERNAME
 
 
-        self.reply(message, "ok creating project %s with %s as project lead" % project_name)
+        self.reply(message, "ok creating project %s with %s as project lead"
+                   % (project_name, proj_admin))
 
         try:
             hc = self.create_hipchat_room(project_name, owner=message.sender.nick['email'])
