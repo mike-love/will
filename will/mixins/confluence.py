@@ -70,7 +70,7 @@ class ConfluenceMixin(object):
 
         return self.client.request("GET", endpoint)
 
-    def create_space(self, space_key=None, description=None,
+    def create_space(self, space_name, space_key=None, description=None,
                      space_admin=None, blueprint=False, **kwargs):
 
         """
@@ -96,7 +96,7 @@ class ConfluenceMixin(object):
             # do blueprint things
 
 
-            data = {"spaceKey": space_key, "name": project_name,
+            data = {"spaceKey": space_key, "name": space_name,
                     "description": description,
                     "spaceBlueprintId": kwargs.get('blueprint_id'),
                     "context": kwargs.get('context_element')}
