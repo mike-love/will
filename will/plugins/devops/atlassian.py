@@ -41,7 +41,7 @@ class AtlassianPlugin(WillPlugin):
             raise
 
         try:
-            j_resp = self.create_jira_project(project_name, proj_admin,
+            j_resp = self.create_jira_project(proj_name=project_name, proj_admin=proj_admin,
                                               proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
 
             self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
