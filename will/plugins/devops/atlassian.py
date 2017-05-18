@@ -35,7 +35,7 @@ class AtlassianPlugin(WillPlugin):
                    % (project_name, proj_admin))
 
         try:
-            hc = self.create_hipchat_room(project_name, owner=message.sender.nick)
+            hc = self.create_hipchat_room(project_name, owner='dummy@example.com')
             self.reply(message, "created hipchat room %(room)s" %{'room': hc.get('name')})
         except:
             raise
