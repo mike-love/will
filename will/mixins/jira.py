@@ -21,7 +21,7 @@ class JIRAMixin(object):
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
 
-        client = RESTClient.client('basic', app_root,
+        jclient = RESTClient.client('basic', app_root,
                                         default_user, default_pass)
     except AttributeError:
         log.error('Cannot find required settings in configuration provided')
@@ -42,7 +42,7 @@ class JIRAMixin(object):
         self.log.info('Getting project %(jira_key)s from %(server)s'
                       % {'jira_key': proj_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint, cb=self.client.strip_data)
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data)
 
     def get_jira_project_keys(self):
         """ get a list of project keys from jira
@@ -80,7 +80,7 @@ class JIRAMixin(object):
             self.log.info('Getting issue %(issueid)s from %(server)s'
                           % {'issueid': issue_id, 'server': self.app_root})
 
-            return self.client.request("GET", endpoint)
+            return self.jclient.request("GET", endpoint)
 
     def _get_many_issues(self):
 
@@ -104,7 +104,7 @@ class JIRAMixin(object):
         self.log.info('Getting project roles for %(proj_key)s from %(server)s'
                       % {'proj_key': proj_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint, cb=self.client.strip_data)
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data)
 
     def get_user(self, user):
         """ get user details
@@ -117,7 +117,7 @@ class JIRAMixin(object):
         self.log.info('Getting %(userid)s from %(server)s'
                       % {'userid': user, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint, cb=self.client.strip_data,
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data,
                                    params=params)
 
     def create_jira_project(self, proj_name, proj_key=None, proj_admin=None,
@@ -148,8 +148,8 @@ class JIRAMixin(object):
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
 
-        return self.client.request("POST", endpoint,
-                                   cb=self.client.strip_data, data=data)
+        return self.jclient.request("POST", endpoint,
+                                   cb=self.jclient.strip_data, data=json.dumps(data))
 
     def create_issue(self, proj_key, summary, description=None, priority=None,
                      issue_type='task'):
@@ -171,7 +171,7 @@ class JIRAMixin(object):
 
         klass.log.info('Creating issue: %(data)s' % {'data': data})
 
-        return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
+        return self.jclient.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
 
     def assign_jira_project_role(self, user, proj_key, roleid):
         """ assign a specific role to a user
@@ -186,6 +186,6 @@ class JIRAMixin(object):
         endpoint = (JIRA_PROJ_ROLES_ENDPOINT
                    % {'id': proj_key, 'roleid': roleid})
         data = {'user': [user]}
-        self.client.request("POST", endpoint, data=data,
-                            cb=self.client.strip_data)
+        self.jclient.request("POST", endpoint, data=data,
+                            cb=self.jclient.strip_data)
 
