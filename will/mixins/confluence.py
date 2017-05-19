@@ -6,7 +6,7 @@ from will import settings
 from ..utils import RESTClient
 from ..utils import key_gen
 
-CONFLUENCE_SPACE_ENDPOINT = "/rest/api/space/{id}"
+CONFLUENCE_SPACE_ENDPOINT = "/rest/api/space/%(id)s"
 CONFLUENCE_USER_ENDPOINT = "/rest/api/user"
 CONFLUENCE_BLUEPRINT_ENDPOINT = "/rest/create-dialog/1.0/space-blueprint/create-space"
 
@@ -19,7 +19,7 @@ class ConfluenceMixin(object):
         default_pass = settings.CONFLUENCE_PASSWORD
         app_root = settings.CONFLUENCE_SERVER
 
-        client = RESTClient.client('basic', app_root,
+        cclient = RESTClient.client('basic', app_root,
                                         default_user, default_pass)
     except AttributeError:
         log.error('Parameter(s) missing from configuration; \
@@ -33,10 +33,10 @@ class ConfluenceMixin(object):
         """
 
         endpoint = CONFLUENCE_SPACE_ENDPOINT % {'id': str(space_key or '')}
-        self.log.info('Getting space with %(key)s from server %(server)'
+        self.log.info('Getting space with %(key)s from server %(server)s'
                       % {'key': space_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint)
+        return self.cclient.request("GET", endpoint)
 
     def get_space_keys(self, space_name=None):
         """ return space keys; if a space_name is not provided all keys are
@@ -53,7 +53,7 @@ class ConfluenceMixin(object):
         else:
             key_list = [r.get('key') for r in self.get_space(space_key=None)]
 
-        return key_list
+            return key_list
 
     def get_confluence_user(self, user_name):
         """ return information about a specific user; if no user is provided
@@ -68,7 +68,7 @@ class ConfluenceMixin(object):
                       % {'user': user_name, 'server': self.app_root})
 
 
-        return self.client.request("GET", endpoint)
+        return self.cclient.request("GET", endpoint)
 
     def create_space(self, space_name, space_key=None, description=None,
                      space_admin=None, blueprint=False, **kwargs):
@@ -108,5 +108,6 @@ class ConfluenceMixin(object):
 
             pass
 
-        return self.request("POST", endpoint=endpoint, data=data)
+        return self.cclient.request("POST", endpoint=endpoint,
+                                    data=data)
 
