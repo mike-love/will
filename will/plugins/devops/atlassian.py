@@ -51,13 +51,10 @@ class AtlassianPlugin(WillPlugin):
             raise
 
         try:
-            # try to reuse the jira key if it's not already assigned in confluence
-            if j_resp['key'] in self.get_space_keys():
-                space_key = key_gen(project_name, 255, self.get_space_keys())
-            else:
-                space_key = j_resp['key']
+            # reuse the jira key if it's not already assigned in confluence
+            space_key = j_resp['key']
 
-            context_elem = {"jira-server": "6028ff00-2ed7-3998-8913-344d65267cba",
+            context_element = {"jira-server": "6028ff00-2ed7-3998-8913-344d65267cba",
                         "jira-project": j_resp['id'], "name": project_name,
                         "spaceKey": space_key, "description":"",
                         "noPageTitlePrefix":"true", "alt_token":"undefined",
@@ -66,8 +63,8 @@ class AtlassianPlugin(WillPlugin):
                         "ContentPageTitle": project_name}
 
             c_resp = self.create_space(project_name, space_key=space_key,
-                                       space_admin=proj_admin, blueprint=True,
-                                       context_element=context_element,
+                                       space_admin=proj_admin, description="",
+                                       blueprint=True, context_element=context_element,
                                        blueprint_id="22dd1292-0487-406b-9c89-d342e6d7e8cd")
             self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
         except:
