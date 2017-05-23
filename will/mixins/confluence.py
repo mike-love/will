@@ -1,6 +1,7 @@
 import logging
 import json
 import re
+import requests
 
 from will import settings
 from ..utils import RESTClient
@@ -120,13 +121,15 @@ class ConfluenceMixin(object):
             :param proj_key: project key to validate
             :retrun boolean
         """
+
         try:
 
            r = self.get_space(space_key)
-        except:
-            raise
+        except requests.exceptions.HTTPError as e:
+            # 404 indicates the project doesn't exist
+            if e.response.status_code == 404:
+                return False
+            else:
+                raise
 
-        if r.json().get('id'):
-            return True
-        else:
-            return False
+        return True
