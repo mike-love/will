@@ -1,6 +1,7 @@
 import logging
 import json
 import re
+import requests
 
 from will import settings
 from ..utils import RESTClient
