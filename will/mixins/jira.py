@@ -189,7 +189,7 @@ class JIRAMixin(object):
         self.jclient.request("POST", endpoint, data=data,
                             cb=self.jclient.strip_data)
 
-    def check_key(self, proj_key):
+    def check_jira_key(self, proj_key):
         """ checks whether the provided key has been used for a project
             :param proj_key: project key to validate
             :retrun boolean
