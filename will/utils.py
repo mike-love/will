@@ -102,7 +102,7 @@ def key_gen(name, key_len, key_check=None, appender=None):
                str(appender or ''))
 
     if key_check:
-        if not(key_check(tmp_key)):
+        if key_check(tmp_key)
             tmp_key = key_gen(name, key_len, key_check,
                               appender=int(appender or 0)+1)
     return tmp_key
