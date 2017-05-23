@@ -201,7 +201,7 @@ class JIRAMixin(object):
            r = self.get_jira_project(proj_key)
         except requests.exceptions.HTTPError as e:
             # 404 indicates the project doesn't exist
-            if e.status_code == 404:
+            if e.response.status_code == 404:
                 return False
             else:
                 raise
