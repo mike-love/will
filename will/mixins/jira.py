@@ -137,7 +137,8 @@ class JIRAMixin(object):
 
         if proj_key is None:
             # Jira keys are maxed at 10 chars
-            proj_key = key_gen(proj_name, 10, self.get_jira_project_keys())
+            proj_key = key_gen(proj_name, 10, self.check_jira_key())
+            logging.debug('Generated Jira Project Key: %s' % proj_key)
 
         data = json.dumps({"key": proj_key, "name": proj_name,
                 "projectTypeKey": proj_type, "lead": proj_admin})
@@ -189,7 +190,7 @@ class JIRAMixin(object):
         self.jclient.request("POST", endpoint, data=data,
                             cb=self.jclient.strip_data)
 
-    def check_jira_key(self, proj_key):
+    def jira_key_exists(self, proj_key):
         """ checks whether the provided key has been used for a project
             :param proj_key: project key to validate
             :retrun boolean
@@ -200,9 +201,9 @@ class JIRAMixin(object):
         except requests.exceptions.HTTPError as e:
             # 404 indicates the project doesn't exist
             if e.status_code == 404:
-                return True
+                return False
             else:
                 raise
 
-        return False
+        return True
 
