@@ -137,7 +137,8 @@ class JIRAMixin(object):
 
         if proj_key is None:
             # Jira keys are maxed at 10 chars
-            proj_key = key_gen(proj_name, 10, self.get_jira_project_keys())
+            proj_key = key_gen(proj_name, 10, self.check_jira_key())
+            logging.debug('Generated Jira Project Key: %s' % proj_key)
 
         data = json.dumps({"key": proj_key, "name": proj_name,
                 "projectTypeKey": proj_type, "lead": proj_admin})
