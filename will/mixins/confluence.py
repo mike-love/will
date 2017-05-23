@@ -89,8 +89,8 @@ class ConfluenceMixin(object):
         if space_key is None:
             # Confluence keys are maxed at 255 chars
             space_key = utils.key_gen(space_name, 255,
-                                            self.get_space_keys())
-
+                                            self.check_space_key())
+            self.log.debug('Generated Confluence Space Key: %s' % space_key)
 
         if blueprint and kwargs.get('context_element'):
             # do blueprint things
@@ -113,3 +113,20 @@ class ConfluenceMixin(object):
         self.log.debug('Creating project: %(data)s' % {'data': data})
         return self.cclient.request("POST", endpoint=endpoint,
                                     data=json.dumps(data))
+
+
+    def check_space_key(self, space_key):
+        """ checks whether the provided key has been used for a project
+            :param proj_key: project key to validate
+            :retrun boolean
+        """
+        try:
+
+           r = self.get_space(proj_key)
+        except:
+            raise
+
+        if r.json().get('id'):
+            return False
+        else:
+            return True
