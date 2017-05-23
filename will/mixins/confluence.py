@@ -113,3 +113,20 @@ class ConfluenceMixin(object):
         self.log.debug('Creating project: %(data)s' % {'data': data})
         return self.cclient.request("POST", endpoint=endpoint,
                                     data=json.dumps(data))
+
+
+    def check_space_key(self, space_key):
+        """ checks whether the provided key has been used for a project
+            :param proj_key: project key to validate
+            :retrun boolean
+        """
+        try:
+
+           r = self.get_space(proj_key)
+        except:
+            raise
+
+        if r.json().get('id'):
+            return False
+        else:
+            return True
