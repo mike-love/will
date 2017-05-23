@@ -122,7 +122,7 @@ class ConfluenceMixin(object):
         """
         try:
 
-           r = self.get_space(proj_key)
+           r = self.get_space(space_key)
         except:
             raise
 
