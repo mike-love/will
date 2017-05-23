@@ -52,7 +52,11 @@ class AtlassianPlugin(WillPlugin):
 
         try:
             # reuse the jira key if it's not already assigned in confluence
-            space_key = j_resp['key']
+            if self.space_key_exists(j_resp['key']):
+                space_key = None
+
+            else:
+                space_key = j_resp['key']
 
             context_element = {"jira-server": "6028ff00-2ed7-3998-8913-344d65267cba",
                         "jira-project": j_resp['id'], "name": project_name,
