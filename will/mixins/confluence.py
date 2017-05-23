@@ -101,13 +101,15 @@ class ConfluenceMixin(object):
                     "spaceBlueprintId": kwargs.get('blueprint_id'),
                     "context": kwargs.get('context_element')}
 
+
             endpoint = CONFLUENCE_BLUEPRINT_ENDPOINT
+
         else:
 
             data = {"key": space_key, "name": project_name}
 
             pass
 
+        self.log.debug('Creating project: %(data)s' % {'data': data})
         return self.cclient.request("POST", endpoint=endpoint,
-                                    data=data)
-
+                                    data=json.dumps(data))
