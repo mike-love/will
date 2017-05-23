@@ -63,7 +63,7 @@ class AtlassianPlugin(WillPlugin):
                         "ContentPageTitle": project_name}
 
             c_resp = self.create_space(project_name, space_key=space_key,
-                                       space_admin=proj_admin, description="",
+                                       description="", space_admin=proj_admin,
                                        blueprint=True, context_element=context_element,
                                        blueprint_id="22dd1292-0487-406b-9c89-d342e6d7e8cd")
             self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
