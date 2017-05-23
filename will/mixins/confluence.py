@@ -115,7 +115,7 @@ class ConfluenceMixin(object):
                                     data=json.dumps(data))
 
 
-    def check_space_key(self, space_key):
+    def space_key_exists(self, space_key):
         """ checks whether the provided key has been used for a project
             :param proj_key: project key to validate
             :retrun boolean
@@ -127,6 +127,6 @@ class ConfluenceMixin(object):
             raise
 
         if r.json().get('id'):
-            return False
-        else:
             return True
+        else:
+            return False
