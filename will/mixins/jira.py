@@ -189,3 +189,20 @@ class JIRAMixin(object):
         self.jclient.request("POST", endpoint, data=data,
                             cb=self.jclient.strip_data)
 
+    def check_key(self, proj_key):
+        """ checks whether the provided key has been used for a project
+            :param proj_key: project key to validate
+            :retrun boolean
+        """
+        try:
+
+           r = self.get_jira_project(proj_key)
+        except requests.exceptions.HTTPError as e:
+            # 404 indicates the project doesn't exist
+            if e.status_code == 404:
+                return True
+            else:
+                raise
+
+        return False
+
