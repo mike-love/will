@@ -89,8 +89,8 @@ class ConfluenceMixin(object):
         if space_key is None:
             # Confluence keys are maxed at 255 chars
             space_key = utils.key_gen(space_name, 255,
-                                            self.get_space_keys())
-
+                                            self.check_space_key())
+            self.log.debug('Generated Confluence Space Key: %s' % space_key)
 
         if blueprint and kwargs.get('context_element'):
             # do blueprint things
