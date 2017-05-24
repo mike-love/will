@@ -107,7 +107,7 @@ class JIRAMixin(object):
 
         return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data)
 
-    def get_user(self, user):
+    def get_jira_user(self, user):
         """ get user details
             :param user: username of the record to return
 
