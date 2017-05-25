@@ -16,12 +16,12 @@ class ConfluenceMixin(object):
 
     try:
         log.debug('Attempting to get mixin settings from configuraiton')
-        default_user = settings.CONFLUENCE_USERNAME
-        default_pass = settings.CONFLUENCE_PASSWORD
-        app_root = settings.CONFLUENCE_SERVER
+        cdefault_user = settings.CONFLUENCE_USERNAME
+        cdefault_pass = settings.CONFLUENCE_PASSWORD
+        capp_root = settings.CONFLUENCE_SERVER
 
-        cclient = RESTClient.client('basic', app_root,
-                                        default_user, default_pass)
+        cclient = RESTClient.client('basic', capp_root,
+                                        cdefault_user, cdefault_pass)
     except AttributeError:
         log.error('Parameter(s) missing from configuration; \
         CONFLUENCE requires CONFLUENCE_USERNAME, CONFLUENCE_PASSWORD, \
@@ -35,7 +35,7 @@ class ConfluenceMixin(object):
 
         endpoint = CONFLUENCE_SPACE_ENDPOINT % {'id': str(space_key or '')}
         self.log.info('Getting space with %(key)s from server %(server)s'
-                      % {'key': space_key, 'server': self.app_root})
+                      % {'key': space_key, 'server': self.capp_root})
 
         return self.cclient.request("GET", endpoint)
 
@@ -65,11 +65,11 @@ class ConfluenceMixin(object):
         endpoint = CONFLUENCE_USER_ENDPOINT
         params = {'username': user_name}
 
-        self.log.info('Getting user %(user)s from server %(server)'
-                      % {'user': user_name, 'server': self.app_root})
+        self.log.info('Getting user %(user)s from server %(server)s'
+                      % {'user': user_name, 'server': self.capp_root})
 
 
-        return self.cclient.request("GET", endpoint)
+        return self.cclient.request("GET", endpoint, params=params)
 
     def create_space(self, space_name, space_key=None, description=None,
                      space_admin=None, blueprint=False, **kwargs):
