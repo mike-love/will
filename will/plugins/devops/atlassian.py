@@ -41,6 +41,12 @@ class AtlassianPlugin(WillPlugin):
             logging.debug('Creating JIRA project %s with %s as admin/lead' % (project_name, proj_admin))
             j_resp = self.create_jira_project(proj_name=project_name, proj_admin=proj_admin,
                                               proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
+            admin_role = self._get_jira_admin(self.get_jira_project_roles(j_resp['key']))
+
+            logging.debug('Adding %(admin)s to role %(roleid)s for project %(j_key)s'
+                          % {'admin': proj_admin, 'roleid': admin_role, 'j_key': j_resp['key']})
+
+            jrole_resp = self.assign_jira_project_role(proj_admin, j_resp['key'], admin_role)
 
             self.reply(message, "Created JIRA Project: %s - %s with ID: %s"
                    % (j_resp['key'], project_name, j_resp['id']))
@@ -80,5 +86,14 @@ class AtlassianPlugin(WillPlugin):
 
             self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
         except:
+            raise
+
+    def _get_jira_admin(self, roles):
+        """ get the jira admin role from a role api response """
+        admin_url = roles.get('Administrators')
+
+        if admin_url:
+            return admin_url.split('/')[-1]
+        else:
             raise
 
