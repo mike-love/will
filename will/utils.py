@@ -139,7 +139,7 @@ class _RESTClient(object):
 
         url = self._uri_join(endpoint)
         try:
-            r = self._sess.request(method=method, url=url, **kwargs)
+            r = self._sess.request(method=method, url=url, params=params, **kwargs)
             if r.text:
                logging.debug('%(endpoint)s: \r\n %(resp)s' %{'endpoint': endpoint, 'resp': r.text})
             if raise_for_status:
