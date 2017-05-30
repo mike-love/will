@@ -84,9 +84,10 @@ class AtlassianPlugin(WillPlugin):
                                        blueprint=True, context_element=context_element,
                                        blueprint_id="22dd1292-0487-406b-9c89-d342e6d7e8cd")
 
-            self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
         except:
             raise
+
+        self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
 
     def _get_jira_admin(self, roles):
         """ get the jira admin role from a role api response """
