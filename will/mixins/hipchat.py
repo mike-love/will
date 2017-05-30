@@ -13,6 +13,7 @@ USER_DETAILS_URL = "https://%(server)s/v2/user/%(user_id)s?auth_token=%(token)s"
 ALL_USERS_URL = ("https://%(server)s/v2/user?auth_token=%(token)s&start-index"
                  "=%(start_index)s&max-results=%(max_results)s")
 ROOM_URL = "https://%(server)s/v2/room"
+INVITE_TO_ROOM = "https://%(server)s/v2/room/%(room_id)s/invite/%(user_id)s"
 
 class HipChatMixin(object):
 
@@ -146,3 +147,34 @@ class HipChatMixin(object):
 
         except:
             raise
+
+    def invite_user(self, user, room, reason=None):
+        """ invite a user to a public room.
+            :param user: The id, email address, or mention name of the user
+            :param room: The id or url encoded name of the room
+            :param reason: (optional) The reason to give to the invited user
+        """
+
+        if reason:
+            data = json.dumps({'reason': reason})
+        else:
+            data = None
+
+        url = INVITE_TO_ROOM % {'server': settings.HIPCHAT_SERVER,
+                                'room_id': room,
+                                'user_id': user}
+        params = {'auth_token': settings.V2_TOKEN}
+        headers = {'Content-type': 'application/json'}
+
+        try:
+            r = requests.post(url, data=data, params=params, headers=headers,
+                              **settings.REQUESTS_OPTIONS)
+
+            if r.text:
+                logging.debug('Endpoint %(endpoint)s response: \r\n %(resp)s'
+                              %{'endpoint': url, 'resp': r.text})
+                return r.json()
+
+        except:
+            raise
+
