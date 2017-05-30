@@ -86,6 +86,10 @@ class AtlassianPlugin(WillPlugin):
 
         except:
             raise
+        try:
+            invite_r = self.invite_user(user_email, hc.get('id'))
+        except:
+            raise
 
         self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
 
