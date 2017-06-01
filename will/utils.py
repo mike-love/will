@@ -2,6 +2,7 @@
 from clint.textui import puts, indent
 from clint.textui import colored
 from HTMLParser import HTMLParser
+<<<<<<< HEAD
 from requests.auth import HTTPBasicAuth
 import requests
 import re
@@ -86,9 +87,6 @@ def sizeof_fmt(num, suffix='B'):
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
-
-
-def key_gen(name, key_len, key_check=None, appender=None):
     """ generate a key from the name parameter
         :param name: string from which to derive a project key;
             usually name or title
