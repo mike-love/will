@@ -28,7 +28,7 @@ class AtlassianPlugin(WillPlugin):
         except:
 
 
-            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
             self.reply(message, "Failed to create HIPCHAT room; issue %s created" % bug_key)
             raise
 
@@ -43,7 +43,7 @@ class AtlassianPlugin(WillPlugin):
 
                 else:
 
-                    bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+                    bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
                     self.reply(message, "Failed to do something room; issue %s created" % bug_key)
                     raise
 
@@ -61,7 +61,7 @@ class AtlassianPlugin(WillPlugin):
                    % (j_resp['key'], project_name, j_resp['id']))
         except:
 
-            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
             self.reply(message, "Failed to create JIRA project; issue %s created" % bug_key)
             raise
 
@@ -80,7 +80,7 @@ class AtlassianPlugin(WillPlugin):
                     proj_admin = settings.CONFLUENCE_USERNAME
                 else:
 
-                    bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+                    bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
                     self.reply(message, "Failed to do something; issue %s created" % bug_key)
                     raise
 
@@ -101,14 +101,14 @@ class AtlassianPlugin(WillPlugin):
         except:
 
 
-            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
             self.reply(message, "Failed to create confluenc space project; issue %s created" % bug_key)
             raise
         try:
             invite_r = self.invite_user(user_email, hc.get('id'))
         except:
 
-            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            bug_key = self._create_issue_on_failure(message.body, user_email, traceback.format_exc())
             self.reply(message, "Failed to invite the user; issue %s created" % bug_key)
             raise
 
