@@ -101,4 +101,12 @@ class AtlassianPlugin(WillPlugin):
             return admin_url.split('/')[-1]
         else:
             raise
+    def _create_issue_on_failure(self, message, user_email, traceback_str):
+        summary = "%s issue creating a project" % (user_email)
+        description = "Message Content: %(content)s \r\n Traceback: %(taceback)"
+                        % {'content': message, 'traceback': traceback_str}
+        project_key = settings.JIRA_ISSUES_PROJ
+        self.create_issue(project_key, summary, description, priority,
+                            issue_type = 'bug')
+
 
