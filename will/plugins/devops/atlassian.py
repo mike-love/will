@@ -128,7 +128,7 @@ class AtlassianPlugin(WillPlugin):
                         % {'content': message, 'traceback': traceback_str})
         project_key = settings.JIRA_ISSUES_PROJ
         r = self.create_issue(project_key, summary, description,
-                              issue_type = 'bug')
+                              issue_type='Bug')
         return r.get('key')
 
 
