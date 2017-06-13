@@ -187,7 +187,7 @@ class JIRAMixin(object):
         endpoint = (JIRA_PROJ_ROLES_ENDPOINT
                    % {'id': proj_key, 'roleid': roleid})
         data = {'user': [user]}
-        self.jclient.request("POST", endpoint, json.dumps(data=data),
+        self.jclient.request("POST", endpoint, data=json.dumps(data),
                             cb=self.jclient.strip_data)
 
     def jira_key_exists(self, proj_key):
