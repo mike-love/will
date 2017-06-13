@@ -25,8 +25,7 @@ class JIRAMixin(object):
         jclient = RESTClient.client('basic', app_root,
                                         default_user, default_pass)
     except AttributeError:
-        log.error('Cannot find required settings in configuration provided')
-        raise Exception('Parameter missing from configuration; JIRA requires JIRA_USERNAME, \
+        log.error('Cannot find required settings in configuration provided; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
 
     def get_jira_project(self, proj_key=None):
