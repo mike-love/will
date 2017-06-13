@@ -11,6 +11,7 @@ import random
 import json
 import re
 import requests
+import traceback
 
 class AtlassianPlugin(WillPlugin):
 
@@ -25,6 +26,10 @@ class AtlassianPlugin(WillPlugin):
             hc = self.create_hipchat_room(project_name, owner=user_email)
             self.reply(message, "created hipchat room %(room)s" %{'room': hc.get('name')})
         except:
+
+
+            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            self.reply(message, "Failed to create HIPCHAT room; issue %s created" % bug_key)
             raise
 
         try:
@@ -37,7 +42,11 @@ class AtlassianPlugin(WillPlugin):
                     proj_admin = settings.JIRA_USERNAME
 
                 else:
+
+                    bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+                    self.reply(message, "Failed to do something room; issue %s created" % bug_key)
                     raise
+
             logging.debug('Creating JIRA project %s with %s as admin/lead' % (project_name, proj_admin))
             j_resp = self.create_jira_project(proj_name=project_name, proj_admin=proj_admin,
                                               proj_template_key="com.pyxis.greenhopper.jira:gh-scrum-template")
@@ -52,6 +61,8 @@ class AtlassianPlugin(WillPlugin):
                    % (j_resp['key'], project_name, j_resp['id']))
         except:
 
+            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            self.reply(message, "Failed to create JIRA project; issue %s created" % bug_key)
             raise
 
         try:
@@ -68,6 +79,9 @@ class AtlassianPlugin(WillPlugin):
                 if e.response.status_code == 404:
                     proj_admin = settings.CONFLUENCE_USERNAME
                 else:
+
+                    bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+                    self.reply(message, "Failed to do something; issue %s created" % bug_key)
                     raise
 
             context_element = {"jira-server": "6028ff00-2ed7-3998-8913-344d65267cba",
@@ -85,10 +99,17 @@ class AtlassianPlugin(WillPlugin):
                                        blueprint_id="22dd1292-0487-406b-9c89-d342e6d7e8cd")
 
         except:
+
+
+            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            self.reply(message, "Failed to create confluenc space project; issue %s created" % bug_key)
             raise
         try:
             invite_r = self.invite_user(user_email, hc.get('id'))
         except:
+
+            bug_key = _create_issue_on_failure(message.body, user_email, traceback.format_exc())
+            self.reply(message, "Failed to invite the user; issue %s created" % bug_key)
             raise
 
         self.reply(message, 'Created atlassian project %(name)s' % {'name': project_name})
@@ -101,4 +122,13 @@ class AtlassianPlugin(WillPlugin):
             return admin_url.split('/')[-1]
         else:
             raise
+    def _create_issue_on_failure(self, message, user_email, traceback_str):
+        summary = "%s issue creating a project" % (user_email)
+        description = "Message Content: %(content)s \r\n Traceback: %(taceback)"
+                        % {'content': message, 'traceback': traceback_str}
+        project_key = settings.JIRA_ISSUES_PROJ
+        r = self.create_issue(project_key, summary, description, priority,
+                              issue_type = 'bug')
+        return r.get('key')
+
 
