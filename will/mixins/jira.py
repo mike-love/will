@@ -169,9 +169,9 @@ class JIRAMixin(object):
         issuetype = {"name": issue_type}
         data = {"fields": {"project": project, "summary": summary,
                 "description": description, "issuetype": issuetype}}
-
+        endpoint = JIRA_ISSUE_ENDPOINT % {'id':''}
         self.log.debug('Creating issue: %(data)s' % {'data': data})
-        return self.jclient.request("POST", JIRA_ISSUE_ENDPOINT, data=json.dumps(data),
+        return self.jclient.request("POST", endpoint, data=json.dumps(data),
                                     cb=self.jclient.strip_data)
 
     def assign_jira_project_role(self, user, proj_key, roleid):
