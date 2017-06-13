@@ -124,7 +124,7 @@ class AtlassianPlugin(WillPlugin):
             raise
     def _create_issue_on_failure(self, message, user_email, traceback_str):
         summary = "%s issue creating a project" % (user_email)
-        description = ("Message Content: %(content)s \r\n Traceback: %(taceback)"
+        description = ("Message Content: %(content)s \r\n Traceback: %(taceback)s"
                         % {'content': message, 'traceback': traceback_str})
         project_key = settings.JIRA_ISSUES_PROJ
         r = self.create_issue(project_key, summary, description, priority,
