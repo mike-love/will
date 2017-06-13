@@ -172,8 +172,8 @@ class JIRAMixin(object):
                 "description": description, "issuetype": issuetype}}
 
         self.log.debug('Creating issue: %(data)s' % {'data': data})
-
-        return self.jclient.request("POST", JIRA_ISSUE_ENDPOINT, data=json.dumps(data))
+        return self.jclient.request("POST", JIRA_ISSUE_ENDPOINT, data=json.dumps(data),
+                                    cb=self.jclient.strip_data)
 
     def assign_jira_project_role(self, user, proj_key, roleid):
         """ assign a specific role to a user
