@@ -1,6 +1,7 @@
 import logging
 import json
 import re
+import requests
 
 from will import settings
 from ..utils import RESTClient
@@ -10,7 +11,7 @@ JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
 JIRA_PROJECT_ENDPOINT = "/rest/api/2/project/%(id)s"
 JIRA_SEARCH_ENDPOINT = "/rest/api/2/search/"
 JIRA_PROJ_ROLES_ENDPOINT = "/rest/api/2/project/%(id)s/role/%(roleid)s"
-
+JIRA_USER_ENDPOINT = "/rest/api/2/user"
 
 class JIRAMixin(object):
     log = logging.getLogger(__name__)
@@ -21,14 +22,13 @@ class JIRAMixin(object):
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
 
-        client = RESTClient.client('basic', app_root,
+        jclient = RESTClient.client('basic', app_root,
                                         default_user, default_pass)
     except AttributeError:
-        log.error('Cannot find required settings in configuration provided')
-        raise Exception('Parameter missing from configuration; JIRA requires JIRA_USERNAME, \
+        log.error('Cannot find required settings in configuration provided; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
 
-    def get_project(self, proj_key=None):
+    def get_jira_project(self, proj_key=None):
         """ return specific project information using the key param, or
             return all projects
 
@@ -42,16 +42,16 @@ class JIRAMixin(object):
         self.log.info('Getting project %(jira_key)s from %(server)s'
                       % {'jira_key': proj_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint, cb=self.client.strip_data)
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data)
 
-    def get_project_keys(self):
+    def get_jira_project_keys(self):
         """ get a list of project keys from jira
 
             :return list of keys
             :JIRA URI: /rest/api/2/project/
         """
 
-        key_list = (r.get('key') for r in self.get_project(proj_key=None))
+        key_list = (r.get('key') for r in self.get_jira_project(proj_key=None))
 
         self.log.info('Fetched keylist from %(server)s'
                       % {'server': self.app_root})
@@ -80,7 +80,7 @@ class JIRAMixin(object):
             self.log.info('Getting issue %(issueid)s from %(server)s'
                           % {'issueid': issue_id, 'server': self.app_root})
 
-            return self.client.request("GET", endpoint)
+            return self.jclient.request("GET", endpoint)
 
     def _get_many_issues(self):
 
@@ -92,7 +92,7 @@ class JIRAMixin(object):
         return self._jira_paged_request("GET", endpoint, user, password,
                                         data_key='issues', params=params)
 
-    def get_project_roles(self, proj_key):
+    def get_jira_project_roles(self, proj_key):
         """ retrieve roles available for a specific project
 
             :param proj_key: jira project to retrieve the roles from
@@ -104,38 +104,53 @@ class JIRAMixin(object):
         self.log.info('Getting project roles for %(proj_key)s from %(server)s'
                       % {'proj_key': proj_key, 'server': self.app_root})
 
-        return self.client.request("GET", endpoint, cb=self.client.strip_data)
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data)
 
-    def create_project(self, proj_name, proj_key=None, proj_admin=None,
-                       proj_type="software"):
+    def get_jira_user(self, user):
+        """ get user details
+            :param user: username of the record to return
+
+        """
+        endpoint = JIRA_USER_ENDPOINT
+        params = {'username': user}
+
+        self.log.info('Getting %(userid)s from %(server)s'
+                      % {'userid': user, 'server': self.app_root})
+
+        return self.jclient.request("GET", endpoint, cb=self.jclient.strip_data,
+                                   params=params)
+
+    def create_jira_project(self, proj_name, proj_key=None, proj_admin=None,
+                       proj_type="software", proj_template_key=None):
         """ create a project with the provided project name
 
             :param proj_name: name of the project
+            :param proj_admin: jira username of the user to assign
+                as the admin on the project
             :param proj_key: (optional) pre-defined jira project key; if not
                 provided one will be generated from the project name
-            :param proj_admin: (optional)jira username of the user to assign
-                as the admin on the project
             :param proj_type: (optional) jira project type to create
-            :param user: (optional): user to act as the submitter
-            :param password: (optional): password of the user acting
-                as submitter
+            :param proj_template_key: (optional) jira template key to use as
+                as the tempate for creating the project
             :return: json response object
         """
 
         if proj_key is None:
             # Jira keys are maxed at 10 chars
-            proj_key = key_gen(proj_name, 10, self.get_project_keys())
+            proj_key = key_gen(proj_name, 10, self.jira_key_exists)
+            logging.debug('Generated Jira Project Key: %s' % proj_key)
 
         data = {"key": proj_key, "name": proj_name,
-                "projectTypeKey": proj_type,
-                "projectTemplateKey": "com.pyxis.greenhopper.jira:gh-scrum-template",
-                "lead": proj_admin}
+                "projectTypeKey": proj_type, "lead": proj_admin}
+
+        if proj_template_key:
+            data['projectTemplateKey'] = proj_template_key
 
         endpoint = JIRA_PROJECT_ENDPOINT % {'id': ''}
         self.log.debug('Creating project: %(data)s' % {'data': data})
 
-        return self.client.request("POST", endpoint,
-                                   cb=self.client.strip_data, data=data)
+        return self.jclient.request("POST", endpoint,
+                                   cb=self.jclient.strip_data, data=json.dumps(data))
 
     def create_issue(self, proj_key, summary, description=None, priority=None,
                      issue_type='task'):
@@ -154,12 +169,12 @@ class JIRAMixin(object):
         issuetype = {"name": issue_type}
         data = {"fields": {"project": project, "summary": summary,
                 "description": description, "issuetype": issuetype}}
+        endpoint = JIRA_ISSUE_ENDPOINT % {'id':''}
+        self.log.debug('Creating issue: %(data)s' % {'data': data})
+        return self.jclient.request("POST", endpoint, data=json.dumps(data),
+                                    cb=self.jclient.strip_data)
 
-        klass.log.info('Creating issue: %(data)s' % {'data': data})
-
-        return self.client.request("POST", JIRA_ISSUE_ENDPOINT, data=data)
-
-    def assign_project_role(self, user, proj_key, roleid):
+    def assign_jira_project_role(self, user, proj_key, roleid):
         """ assign a specific role to a user
 
             :param user: user to assign the role to
@@ -172,6 +187,23 @@ class JIRAMixin(object):
         endpoint = (JIRA_PROJ_ROLES_ENDPOINT
                    % {'id': proj_key, 'roleid': roleid})
         data = {'user': [user]}
-        self.client.request("POST", endpoint, data=data,
-                            cb=self.client.strip_data)
+        self.jclient.request("POST", endpoint, data=json.dumps(data),
+                            cb=self.jclient.strip_data)
+
+    def jira_key_exists(self, proj_key):
+        """ checks whether the provided key has been used for a project
+            :param proj_key: project key to validate
+            :retrun boolean
+        """
+        try:
+
+           r = self.get_jira_project(proj_key)
+        except requests.exceptions.HTTPError as e:
+            # 404 indicates the project doesn't exist
+            if e.response.status_code == 404:
+                return False
+            else:
+                raise
+
+        return True
 

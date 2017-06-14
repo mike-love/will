@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth
 import requests
 import re
 import json
+import logging
 
 class Bunch(dict):
     def __init__(self, **kw):
@@ -86,13 +87,12 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-
-def key_gen(name, key_len, existing_keys=None, appender=None):
+def key_gen(name, key_len, key_check, appender=None):
     """ generate a key from the name parameter
         :param name: string from which to derive a project key;
             usually name or title
         :param key_len: maximum length of the key value
-        :param existing_keys: list of keys to ensure uniquness
+        :param key_check: callback to verify key is unique
         :param appender(optional) integer to append if the key is not
             unique
         :return key
@@ -100,11 +100,10 @@ def key_gen(name, key_len, existing_keys=None, appender=None):
     tmp_key = (re.sub('[^A-Z]', '', name)[:key_len-len(str(appender or ''))] +
                str(appender or ''))
 
-    if existing_keys:
-        if tmp_key in existing_keys:
-            tmp_key = key_gen(name, key_len, existing_keys,
+    if key_check:
+        if key_check(tmp_key):
+            tmp_key = key_gen(name, key_len, key_check,
                               appender=int(appender or 0)+1)
-
     return tmp_key
 
 
@@ -139,8 +138,9 @@ class _RESTClient(object):
 
         url = self._uri_join(endpoint)
         try:
-            r = self._sess.request(method=method, url=url, **kwargs)
-
+            r = self._sess.request(method=method, url=url, params=params, **kwargs)
+            if r.text:
+               logging.debug('%(endpoint)s: \r\n %(resp)s' %{'endpoint': endpoint, 'resp': r.text})
             if raise_for_status:
                 r.raise_for_status()
             if cb:
