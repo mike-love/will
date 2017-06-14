@@ -158,7 +158,18 @@ class _RESTClient(object):
             raise AttributeError
 
 
+class BasicRESTClient(_RESTClient):
+    def __init__(self, base_url, username=None, password=None):
 
+        super(SimpleRESTClient, self).__init__(base_url)
+
+        if username and password:
+            auth = HTTPBasicAuth(username, password)
+        self._sess = requests.Session()
+        self._sess.headers['Content-Type'] = 'application/json'
+        self._sess.auth = auth
+
+# TODO: Remove class
 class _BasicRESTClient(_RESTClient):
     """ RESTClient with Basic HTTP auth"""
 
@@ -172,6 +183,7 @@ class _BasicRESTClient(_RESTClient):
         self._sess.auth = auth
 
 
+# TODO: Remove class
 class RESTClient(object):
     @staticmethod
     def client(auth, base_url, username=None, password=None):
