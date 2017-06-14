@@ -9,7 +9,7 @@ import requests
 import random
 GIPHY_KEY = 'dc6zaTOxFJmzC'
 
-GIF_URL = 'http://api.giphy.com/v1/gifs/translate?s=%(search_string)s&api_key=(api_key)s'
+GIF_URL = 'http://api.giphy.com/v1/gifs/translate?s=%(search_string)s&api_key=%(api_key)s'
 
 class GIPHYPlugin(WillPlugin):
     @require_settings('GIPHY_KEY')
