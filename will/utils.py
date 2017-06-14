@@ -161,7 +161,7 @@ class _RESTClient(object):
 class BasicRESTClient(_RESTClient):
     def __init__(self, base_url, username=None, password=None):
 
-        super(SimpleRESTClient, self).__init__(base_url)
+        super(BasicRESTClient, self).__init__(base_url)
 
         if username and password:
             auth = HTTPBasicAuth(username, password)
