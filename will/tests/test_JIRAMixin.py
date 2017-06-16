@@ -3,55 +3,52 @@ import unittest
 import requests
 
 from will import settings
+
+settings.JIRA_USERNAME = 'mlove'
+settings.JIRA_PASSWORD = '123'
+settings.JIRA_SERVER = 'test.com'
+
 from will import utils
+from will.mixins import JIRAMixin
 import json
 
-class TestJIRAMixin(unittest.TestCase):
+class TestJIRAMixin(unittest.TestCase, JIRAMixin):
     def setUp(self):
-        settings.JIRA_USERNAME = 'mlove'
-        settings.JIRA_PASSWORD = '123'
-        settings.JIRA_SERVER = 'test.com'
-
+        pass
 
     def test_ClientSetup(self):
 
-        from will.mixins import JIRAMixin
 
-        self.assertTrue(JIRAMixin.client)
+        self.assertTrue(self.jclient)
 
     @patch('will.utils._RESTClient.request')
     def test_get_project_multi(self, mock_call):
-
-        from will.mixins import JIRAMixin
 
         data = [{'id':123, 'key':'ABC', 'name':'test1'},
                 {'id':456, 'key':'DEF', 'name':'test2'},
                 {'id':789, 'key':'GH9', 'name':'test3'}]
         mock_call.return_value=json.dumps(data)
-        r = JIRAMixin.get_project(proj_key=None)
+        r = self.get_jira_project(proj_key=None)
         mock_call.assert_called_with('GET',
                                      '/rest/api/2/project/',
-                                     cb=JIRAMixin.client.strip_data)
+                                     cb=self.jclient.strip_data)
 
         self.assertEqual(mock_call.return_value, r)
 
     @patch('will.utils._RESTClient.request')
     def test_get_project_one(self, mock_call):
 
-        from will.mixins import JIRAMixin
         data = [{'id':123, 'key':'ABC', 'name':'test1'}]
         mock_call.return_value=json.dumps(data)
-        r = JIRAMixin.get_project(proj_key='ABC')
+        r = self.get_jira_project(proj_key='ABC')
         mock_call.assert_called_with('GET',
                                      '/rest/api/2/project/ABC',
-                                     cb=JIRAMixin.client.strip_data)
+                                     cb=self.jclient.strip_data)
 
         self.assertEqual(mock_call.return_value, r)
 
-    @patch('will.mixins.JIRAMixin.get_project')
+    @patch('will.mixins.JIRAMixin.get_jira_project')
     def test_get_project_keys(self, mock_call):
-
-        from will.mixins import JIRAMixin
 
         data = [{'id':123, 'key':'ABC', 'name':'test1'},
                 {'id':456, 'key':'DEF', 'name':'test2'},
@@ -59,19 +56,17 @@ class TestJIRAMixin(unittest.TestCase):
 
         mock_call.return_value=data
 
-        r = JIRAMixin.get_project_keys()
+        r = self.get_jira_project_keys()
         mock_call.assert_called_with(proj_key=None)
         self.assertEqual(['ABC','DEF','GH9'], list(r))
 
     @patch('will.utils._RESTClient.request')
     def test_create_project(self, mock_call):
 
-        from will.mixins import JIRAMixin
-
         data = [{'id':123, 'key':'ABC', 'name':'test1'}]
 
         mock_call.return_value=json.dumps(data)
-        r = JIRAMixin.create_project('Test 1', 'ABC','user1')
+        r = self.create_jira_project('Test 1', 'ABC','user1')
 
         calldata = {"key": "ABC",
                     "name": "Test 1",
@@ -81,7 +76,7 @@ class TestJIRAMixin(unittest.TestCase):
 
         mock_call.assert_called_with('POST',
                                      '/rest/api/2/project/',
-                                     cb=JIRAMixin.client.strip_data,
+                                     cb=self.jclient.strip_data,
                                      data=calldata)
 
         self.assertEqual(mock_call.return_value, r)
@@ -89,7 +84,6 @@ class TestJIRAMixin(unittest.TestCase):
     @patch('will.utils._RESTClient.request')
     def test_get_project_roles(self, mock_call):
 
-        from will.mixins import JIRAMixin
         data = [{'id': '10001', 'name': 'Admin'},
                 {'id': '10002', 'name': 'Developer'},
                 {'id': '10003', 'name': 'Lead'}]
@@ -97,24 +91,22 @@ class TestJIRAMixin(unittest.TestCase):
         proj_key = 'ABC123'
         mock_call.return_value=json.dumps(data)
 
-        r = JIRAMixin.get_project_roles(proj_key)
+        r = self.get_jira_project_roles(proj_key)
 
         mock_call.assert_called_with('GET',
                                      '/rest/api/2/project/ABC123/role/',
-                                     cb=JIRAMixin.client.strip_data)
+                                     cb=self.jclient.strip_data)
         self.assertEqual(mock_call.return_value,r)
 
 
     @patch('will.utils._RESTClient.request')
     def test_assign_project_role(self, mock_call):
 
-        from will.mixins import JIRAMixin
-
         proj_key = 'ABC123'
 
-        r = JIRAMixin.assign_project_role('user1', proj_key, '10002')
+        r = self.assign_jira_project_role('user1', proj_key, '10002')
 
         mock_call.assert_called_with('POST',
                                      '/rest/api/2/project/ABC123/role/10002',
-                                     cb=JIRAMixin.client.strip_data,
+                                     cb=self.jclient.strip_data,
                                      data={'user':['user1']})
