@@ -13,7 +13,7 @@ class TestRESTClientFactory(unittest.TestCase):
         self.assertIsInstance(RESTClient.client('basic','test.com','mlove','123'),_BasicRESTClient)
         self.assertIsInstance(RESTClient.client('bAsiC','test.com','mlove','123'),_BasicRESTClient)
         self.assertIsInstance(RESTClient.client('BASIC','test.com','mlove','123'),_BasicRESTClient)
-"""
+
 class Test_BasicRESTClient(unittest.TestCase):
     def setUp(self):
         self.client = BasicRESTClient('test.com', 'mlove', '123')
