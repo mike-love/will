@@ -22,8 +22,7 @@ class JIRAMixin(object):
         default_pass = settings.JIRA_PASSWORD
         app_root = settings.JIRA_SERVER
 
-        jclient = RESTClient.client('basic', app_root,
-                                        default_user, default_pass)
+        jclient = BasicRESTClient(app_root, default_user, default_pass)
     except AttributeError:
         log.error('Cannot find required settings in configuration provided; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
