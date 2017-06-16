@@ -20,8 +20,7 @@ class ConfluenceMixin(object):
         cdefault_pass = settings.CONFLUENCE_PASSWORD
         capp_root = settings.CONFLUENCE_SERVER
 
-        cclient = RESTClient.client('basic', capp_root,
-                                        cdefault_user, cdefault_pass)
+        cclient = BasicRESTClient(capp_root, cdefault_user, cdefault_pass)
     except AttributeError:
         log.error('Parameter(s) missing from configuration; \
         CONFLUENCE requires CONFLUENCE_USERNAME, CONFLUENCE_PASSWORD, \
