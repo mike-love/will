@@ -4,7 +4,7 @@ import re
 import requests
 
 from will import settings
-from ..utils import RESTClient
+from ..utils import BasicRESTClient
 from ..utils import key_gen
 
 JIRA_ISSUE_ENDPOINT = "/rest/api/2/issue/%(id)s"
@@ -23,6 +23,7 @@ class JIRAMixin(object):
         app_root = settings.JIRA_SERVER
 
         jclient = BasicRESTClient(app_root, default_user, default_pass)
+
     except AttributeError:
         log.error('Cannot find required settings in configuration provided; JIRA requires JIRA_USERNAME, \
                 JIRA_PASSWORD, and JIRA_SERVER.')
