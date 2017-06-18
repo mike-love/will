@@ -2,15 +2,11 @@ from mock import MagicMock, patch
 import unittest
 import requests
 from will import settings
-
-settings.JIRA_USERNAME = 'mlove'
-settings.JIRA_PASSWORD = '123'
-settings.JIRA_SERVER = 'test.com'
-
+from will.mixins import JIRAMixin
 from will import utils
 import json
 
-class TestJIRAMixin(unittest.TestCase, will.mixins.JIRAMixin):
+class TestJIRAMixin(unittest.TestCase, JIRAMixin):
     def setUp(self):
         pass
 
