@@ -58,7 +58,8 @@ class TestJIRAMixin(unittest.TestCase, JIRAMixin):
         data = [{'id':123, 'key':'ABC', 'name':'test1'}]
 
         mock_call.return_value=json.dumps(data)
-        r = self.create_jira_project('Test 1', 'ABC','user1')
+        r = self.create_jira_project('Test 1', 'ABC','user1',
+                                     'software','com.pyxis.greenhopper.jira:gh-scrum-template')
 
         calldata = {"key": "ABC",
                     "name": "Test 1",
@@ -69,7 +70,7 @@ class TestJIRAMixin(unittest.TestCase, JIRAMixin):
         mock_call.assert_called_with('POST',
                                      '/rest/api/2/project/',
                                      cb=self.jclient.strip_data,
-                                     data=calldata)
+                                     data=json.dumps(calldata))
 
         self.assertEqual(mock_call.return_value, r)
 
@@ -101,4 +102,4 @@ class TestJIRAMixin(unittest.TestCase, JIRAMixin):
         mock_call.assert_called_with('POST',
                                      '/rest/api/2/project/ABC123/role/10002',
                                      cb=self.jclient.strip_data,
-                                     data={'user':['user1']})
+                                     data=json.dumps({'user':['user1']}))
