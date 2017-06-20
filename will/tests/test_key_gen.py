@@ -4,21 +4,32 @@ from will import utils
 
 class Testkey_gen(unittest.TestCase):
     def setUp(self):
-        self.keylist=['ABCWE','TKG1','BMCQWR', 'TIAUT']
         self.keylength=10
+        self.fail_count=1
 
     def test_key_gen(self):
         tmp = utils.key_gen('Test Key Generation',
-                            self.keylength, self.keylist)
+                            self.keylength, None)
         self.assertTrue(tmp)
         self.assertTrue((len(tmp)<=self.keylength))
-        self.assertTrue((tmp not in self.keylist))
 
-    def test_key_gen_unique(self):
+    def test_key_gen_cb_test(self):
 
-        tmp = utils.key_gen('This Is A Unique Test',
-                            self.keylength, self.keylist)
+        tmp = utils.key_gen('This Is A CallBack Test',
+                            self.keylength,
+                            self._key_check_cb)
+
         self.assertTrue(tmp)
+
         self.assertTrue((len(tmp)<=self.keylength))
-        self.assertTrue((tmp not in self.keylist))
+
+    def _key_check_cb(self, key=None):
+        """ call back to simulate the check for an existing
+        key
+        """
+        if self.fail_count <= 0:
+            return False
+        else:
+            self.fail_count += -1
+            return True
 

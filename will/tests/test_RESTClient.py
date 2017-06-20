@@ -1,19 +1,10 @@
 from mock import MagicMock, patch
 import unittest
 
-from will.utils import RESTClient, BasicRESTClient
+from will.utils import BasicRESTClient
 import requests
 import json
 
-# TODO: Remove Test with class
-class TestRESTClientFactory(unittest.TestCase):
-    def setUp(self):
-        pass
-    def test_BasicClient_lower(self):
-        self.assertIsInstance(RESTClient.client('basic','test.com','mlove','123'),_BasicRESTClient)
-        self.assertIsInstance(RESTClient.client('bAsiC','test.com','mlove','123'),_BasicRESTClient)
-        self.assertIsInstance(RESTClient.client('BASIC','test.com','mlove','123'),_BasicRESTClient)
-"""
 class Test_BasicRESTClient(unittest.TestCase):
     def setUp(self):
         self.client = BasicRESTClient('test.com', 'mlove', '123')

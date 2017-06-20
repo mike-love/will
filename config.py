@@ -146,3 +146,7 @@ PLUGIN_BLACKLIST = [
 # Google Application key for "image me" command
 # GOOGLE_API_KEY = "FILL THIS IN"
 # GOOGLE_CUSTOM_SEARCH_KEY = "FILL THIS IN"
+
+JIRA_USERNAME = 'mlove'
+JIRA_PASSWORD = '123'
+JIRA_SERVER = 'test.com'
