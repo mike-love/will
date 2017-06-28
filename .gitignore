@@ -47,5 +47,3 @@ docs/.DS_Store
 .*.sw[a-z]
 
 source/logo.psd
-# don't leak passwords again
-config.py
