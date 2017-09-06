@@ -3,8 +3,10 @@ services:
     redis:
         volumes:
             - ./data/redis:/data
+        container_name: redis_prod
 
     will:
+        container_name: will_prod
         image:  harbor.columncloud.com/will/will-master
         env_file:
             - prod.env

@@ -1,6 +1,9 @@
 version: '3.2'
 services:
+    redis:
+        container_name: redis_test
     will:
+        container_name: will_test
         image:  harbor.columncloud.com/will/will-release_next
         env_file:
             - test.env
