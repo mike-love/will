@@ -47,3 +47,7 @@ docs/.DS_Store
 .*.sw[a-z]
 
 source/logo.psd
+*tar.bz2
+docker/data*
+
+
