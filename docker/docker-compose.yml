@@ -3,8 +3,6 @@ version: '3.2'
 services:
     redis:
         image: redis:alpine
-        ports:
-            - 6379:6379
     will:
         image:  harbor.columncloud.com/will/will-release_next
         ports:
