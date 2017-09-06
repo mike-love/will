@@ -7,3 +7,5 @@ services:
         image:  harbor.columncloud.com/will/will-release_next
         env_file:
             - test.env
+        ports:
+            - 9090:8080
