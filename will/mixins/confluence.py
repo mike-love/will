@@ -4,7 +4,7 @@ import re
 import requests
 
 from will import settings
-from ..utils import RESTClient
+from ..utils import BasicRESTClient
 from ..utils import key_gen
 
 CONFLUENCE_SPACE_ENDPOINT = "/rest/api/space/%(id)s"
