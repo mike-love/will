@@ -1,0 +1,9 @@
+version: '3.2'
+services:
+    redis:
+        volumes:
+            - ./data/redis:/data
+
+    will:
+        env_file:
+            - prod.env

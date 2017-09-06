@@ -1,5 +1,5 @@
 #Pull CENTOS
-FROM centos
+FROM python:2.7-stretch
 
 # Maintainer
 # ----------
@@ -30,10 +30,6 @@ ARG WILL_BUNDLE
 ENV _WILL_HOME=/opt/will
 
 RUN mkdir -p $_WILL_HOME
-RUN yum install epel-release -y && \
-    yum install python python-devel python-pip python-wheel python-setuptools openssl-devel \
-    git gcc -y && \
-    yum clean all
 
 ADD $WILL_BUNDLE $_WILL_HOME
 
