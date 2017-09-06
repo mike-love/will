@@ -6,7 +6,7 @@ services:
         ports:
             - 6379:6379
     will:
-        image:  harbor.columncloud.com/will/will-release-next
+        image:  harbor.columncloud.com/will/will-release_next
         ports:
             - 80:8080
         depends_on:
