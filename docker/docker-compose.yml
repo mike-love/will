@@ -6,14 +6,8 @@ services:
         ports:
             - 6379:6379
     will:
-        build:
-            context: ./column-will
-            args:
-                WILL_BUNDLE: col-will-release.tar.bz2
-        image: column/will:latest 
+        image:  harbor.columncloud.com/will/will-${WILL_BRANCH}
         ports:
             - 80:8080
         depends_on:
             - redis
-        env_file:
-            - default.env

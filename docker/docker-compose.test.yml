@@ -1,0 +1,6 @@
+version: '3.2'
+services:
+    will:
+        image:  harbor.columncloud.com/will/will-release-next
+        env_file:
+            - test.env

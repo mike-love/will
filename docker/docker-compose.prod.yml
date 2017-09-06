@@ -5,5 +5,6 @@ services:
             - ./data/redis:/data
 
     will:
+        image:  harbor.columncloud.com/will/will-master
         env_file:
             - prod.env
