@@ -237,6 +237,7 @@ To set your %(name)s:
         missing_settings = False
         missing_setting_error_messages = []
         one_valid_backend = False
+        self.valid_io_backends = []
 
         if not hasattr(settings, "IO_BACKENDS"):
             settings.IO_BACKENDS = ["will.backends.io_adapters.shell", ]
@@ -250,7 +251,6 @@ To set your %(name)s:
                             path_name = [path_name]
                         file_name, path_name, description = imp.find_module(mod, path_name)
 
-                    one_valid_backend = True
                     # show_valid("%s" % b)
                     module = import_module(b)
                     for class_name, cls in inspect.getmembers(module, predicate=inspect.isclass):
@@ -263,7 +263,15 @@ To set your %(name)s:
                             c = cls()
                             show_valid(c.friendly_name)
                             c.verify_settings()
-                except Exception :
+                            one_valid_backend = True
+                            self.valid_io_backends.append(b)
+                except EnvironmentError as e:
+                    puts(colored.red("  ✗ %s is missing settings, and will be disabled." % b))
+                    puts()
+
+                    missing_settings = True
+
+                except Exception as e:
                     error_message = (
                         "IO backend %s is missing. Please either remove it \nfrom config.py "
                         "or WILL_IO_BACKENDS, or provide it somehow (pip install, etc)."
@@ -276,7 +284,7 @@ To set your %(name)s:
                     missing_setting_error_messages.append(error_message)
                     missing_settings = True
 
-        if missing_settings or not one_valid_backend:
+        if missing_settings and not one_valid_backend:
             puts("")
             error(
                 "Unable to find a valid IO backend - will has no way to talk "
@@ -486,24 +494,25 @@ To set your %(name)s:
     def handle_sys_exit(self, *args, **kwargs):
         # if not self.exiting:
         try:
-            print('\n\nReceived keyboard interrupt, quitting threads.',)
+            sys.stdout.write("\n\nReceived shutdown, quitting threads.")
+            sys.stdout.flush()
             self.exiting = True
 
             if "WILL_EPHEMERAL_SECRET_KEY" in os.environ:
                 os.environ["WILL_SECRET_KEY"] = ""
                 os.environ["WILL_EPHEMERAL_SECRET_KEY"] = ""
 
-            if self.scheduler_thread:
+            if hasattr(self, "scheduler_thread") and self.scheduler_thread:
                 try:
                     self.scheduler_thread.terminate()
                 except KeyboardInterrupt:
                     pass
-            if self.bottle_thread:
+            if hasattr(self, "bottle_thread") and self.bottle_thread:
                 try:
                     self.bottle_thread.terminate()
                 except KeyboardInterrupt:
                     pass
-            if self.incoming_event_thread:
+            if hasattr(self, "incoming_event_thread") and self.incoming_event_thread:
                 try:
                     self.incoming_event_thread.terminate()
                 except KeyboardInterrupt:
@@ -514,23 +523,26 @@ To set your %(name)s:
 
             self.publish("system.terminate", {})
 
-            for t in self.analysis_threads:
-                try:
-                    t.terminate()
-                except KeyboardInterrupt:
-                    pass
+            if hasattr(self, "analysis_threads") and self.analysis_threads:
+                for t in self.analysis_threads:
+                    try:
+                        t.terminate()
+                    except KeyboardInterrupt:
+                        pass
 
-            for t in self.generation_threads:
-                try:
-                    t.terminate()
-                except KeyboardInterrupt:
-                    pass
+            if hasattr(self, "generation_threads") and self.generation_threads:
+                for t in self.generation_threads:
+                    try:
+                        t.terminate()
+                    except KeyboardInterrupt:
+                        pass
 
-            for t in self.running_execution_threads:
-                try:
-                    t.terminate()
-                except KeyboardInterrupt:
-                    pass
+            if hasattr(self, "running_execution_threads") and self.running_execution_threads:
+                for t in self.running_execution_threads:
+                    try:
+                        t.terminate()
+                    except KeyboardInterrupt:
+                        pass
         except:
             print("\n\n\nException while exiting!!")
             import traceback
@@ -538,9 +550,9 @@ To set your %(name)s:
             sys.exit(1)
 
         while (
-            (self.scheduler_thread and self.scheduler_thread.is_alive()) or
-            (self.bottle_thread and self.bottle_thread.is_alive()) or
-            (self.incoming_event_thread and self.incoming_event_thread.is_alive()) or
+            (hasattr(self, "scheduler_thread") and self.scheduler_thread and self.scheduler_thread and self.scheduler_thread.is_alive()) or
+            (hasattr(self, "scheduler_thread") and self.scheduler_thread and self.bottle_thread and self.bottle_thread.is_alive()) or
+            (hasattr(self, "scheduler_thread") and self.scheduler_thread and self.incoming_event_thread and self.incoming_event_thread.is_alive()) or
             # self.stdin_listener_thread.is_alive() or
             any([t.is_alive() for t in self.io_threads]) or
             any([t.is_alive() for t in self.analysis_threads]) or
@@ -708,7 +720,7 @@ To set your %(name)s:
             error("Unable to bootstrap pubsub - attempting to load %s" % module_name)
             puts(traceback.format_exc())
             sys.exit(1)
-        except Exception :
+        except Exception as e:
             error("Unable to bootstrap pubsub!")
             puts(traceback.format_exc())
             sys.exit(1)
@@ -743,7 +755,7 @@ To set your %(name)s:
                     meta["num_times_per_day"]
                 )
             bootstrapped = True
-        except Exception :
+        except Exception as e:
             self.startup_error("Error bootstrapping scheduler", e)
         if bootstrapped:
             show_valid("Scheduler started.")
@@ -762,7 +774,7 @@ To set your %(name)s:
                         bottle_route_args[k[len("bottle_"):]] = v
                 bottle.route(instantiated_fn.will_fn_metadata["bottle_route"], **bottle_route_args)(instantiated_fn)
             bootstrapped = True
-        except Exception :
+        except Exception as e:
             self.startup_error("Error bootstrapping bottle", e)
         if bootstrapped:
             show_valid("Web server started at %s." % (settings.PUBLIC_URL,))
@@ -775,7 +787,7 @@ To set your %(name)s:
         self.io_backends = []
         self.io_threads = []
         self.stdin_io_backends = []
-        for b in settings.IO_BACKENDS:
+        for b in self.valid_io_backends:
             module = import_module(b)
             for class_name, cls in inspect.getmembers(module, predicate=inspect.isclass):
                 try:
@@ -806,7 +818,7 @@ To set your %(name)s:
                             self.io_threads.append(thread)
 
                         show_valid("IO: %s Backend started." % cls.friendly_name)
-                except Exception :
+                except Exception as e:
                     self.startup_error("Error bootstrapping %s io" % b, e)
 
             self.io_backends.append(b)
@@ -835,7 +847,7 @@ To set your %(name)s:
                         thread.start()
                         self.analysis_threads.append(thread)
                         show_valid("Analysis: %s Backend started." % cls.__name__)
-                except Exception :
+                except Exception as e:
                     self.startup_error("Error bootstrapping %s io" % b, e)
 
             self.analysis_backends.append(b)
@@ -864,7 +876,7 @@ To set your %(name)s:
                         thread.start()
                         self.generation_threads.append(thread)
                         show_valid("Generation: %s Backend started." % cls.__name__)
-                except Exception :
+                except Exception as e:
                     self.startup_error("Error bootstrapping %s io" % b, e)
 
             self.generation_backends.append(b)
@@ -923,7 +935,7 @@ To set your %(name)s:
                                     "parent_help_text": parent_help_text,
                                     "blacklisted": blacklisted,
                                 }
-                            except Exception :
+                            except Exception as e:
                                 self.startup_error("Error loading %s" % (module_path,), e)
 
                 self.plugins = []
@@ -943,9 +955,9 @@ To set your %(name)s:
                                         "parent_help_text": plugin_modules_library[name]["parent_help_text"],
                                         "blacklisted": plugin_modules_library[name]["blacklisted"],
                                     })
-                            except Exception :
+                            except Exception as e:
                                 self.startup_error("Error bootstrapping %s" % (class_name,), e)
-                    except Exception :
+                    except Exception as e:
                         self.startup_error("Error bootstrapping %s" % (name,), e)
 
             self._plugin_modules_library = plugin_modules_library
@@ -1067,7 +1079,7 @@ To set your %(name)s:
                                                 # puts("- %s" % function_name)
                                                 self.bottle_routes.append((plugin_info["class"], function_name))
 
-                                except Exception :
+                                except Exception as e :
                                     error(plugin_name)
                                     self.startup_error(
                                         "Error bootstrapping %s.%s" % (
@@ -1081,7 +1093,7 @@ To set your %(name)s:
                                     warn(w)
                             else:
                                 show_valid(plugin_name)
-                except Exception :
+                except Exception as e:
                     self.startup_error("Error bootstrapping %s" % (plugin_info["class"],), e)
 
         puts("")
