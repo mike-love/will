@@ -1,5 +1,44 @@
 # Releases
 
+#### 2.1.0 - November 28, 2017
+
+Planned release that includes:
+
+* Automatic [docker hub builds](https://hub.docker.com/r/heywill/will/) thanks to [@mike-love](https://github.com/mike-love)
+* Upgrades to use base markdownify package, as the proposed changes have been [merged and released](https://github.com/matthewwithanm/python-markdownify/pull/1).
+* New fabric commands to manage docker builds and releases.
+
+
+#### 2.0.2 - November 22, 2017
+
+Bugfix release that fixes:
+
+* Will once again joins all hipchat rooms `HIPCHAT_ROOMS` was not specified.  Thanks to [vissree](https://github.com/vissree) for finding and reporting this bug!
+
+#### 2.0.1 - November 21, 2017
+
+Same release as 2.0.1, removes beta tag.
+
+#### 2.0.1beta4 - November 20, 2017
+
+Bugfix release that fixes:
+
+* `color` parameter wasn't working properly in Slack.
+* Fixes up slack escaping, to support `<slack formatted|https://example.com>` links.  Thanks to [@netjunki](https://github.com/netjunki) for the report on this and the above.
+
+Minor features:
+* Adds a new `start_thread` parameter to `say()` and `reply()` to allow Will to start slack threads.
+
+
+#### 2.0.1beta3 - November 13, 2017
+
+Bugfix release that fixes:
+
+* High CPU in some setups, thanks to [mattcl](https://github.com/mattcl) for the report and debuggging!
+* Updates to `markdownify` fork 0.4.1.
+
+
+
 #### 2.0.1beta2 - November 9, 2017
 
 Bugfix release that fixes:
