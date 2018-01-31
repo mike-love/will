@@ -10,8 +10,7 @@ CTAG = os.environ.get("CTAG", "")
 
 DOCKER_BUILDS = [
     {
-        "ctagname": "mlove/will:python2.7%(CTAG)s" % os.environ,
-        "name": "mlove/will:" % os.environ,
+        "ctagname": "mlove/will:%(CTAG)s" % os.environ,
         "dir": "will/will-py2/",
         "production": True
     },
@@ -35,7 +34,7 @@ def docker_tag():
     print("Building Docker Releases...")
     with lcd(DOCKER_PATH):
 
-        local("docker tag %(ctagname)s %(name)s" %
+        local("docker tag %(ctagname)s mlove/will:latest" %
                 filter(lambda x: x["default"], DOCKER_BUILDS))
 
 
@@ -43,7 +42,9 @@ def docker_push():
     print("Pushing Docker to Docker Cloud...")
     with lcd(DOCKER_PATH):
         local("docker login -u $DOCKER_USER -p $DOCKER_PASS")
-        local("docker push heywill/will:latest")
+        for c in DOCKER_BUILDS:
+            local("docker push %(ctagname)s" %c)
+        local("docker push mlove/will:latest")
 
 def docker_deploy():
     docker_build()
