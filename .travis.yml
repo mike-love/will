@@ -2,6 +2,8 @@ language: python
 sudo: false
 services:
     - docker
+
+#block other builds
 branches:
     only:
         - release/personal
