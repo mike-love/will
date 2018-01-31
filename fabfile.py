@@ -11,7 +11,7 @@ CTAG = os.environ.get("CTAG", "")
 DOCKER_BUILDS = [
     {
         "ctagname": "mlove/will:python2.7%(CTAG)s" % os.environ,
-        "name": "mlove/will:python2.7" % os.environ,
+        "name": "mlove/will:" % os.environ,
         "dir": "will/will-py2/",
         "production": True
     },
@@ -28,7 +28,7 @@ def docker_build():
     print("Building Docker Images...")
     with lcd(DOCKER_PATH):
         for c in DOCKER_BUILDS:
-            local("docker build --build-arg repo=https://github.com/mike-love/will --build-arg branch=release/personal %(ctagname)s %(dir)s" % c)
+            local("docker build --build-arg repo=https://github.com/mike-love/will --build-arg branch=release/personal -t %(ctagname)s %(dir)s" % c)
 
 
 def docker_tag():
