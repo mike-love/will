@@ -28,7 +28,7 @@ def docker_build():
     print("Building Docker Images...")
     with lcd(DOCKER_PATH):
         for c in DOCKER_BUILDS:
-            local("docker build --build-arg repo=https://github.com/mike-love/will --build-arg branch=release/personal build %(ctagname)s %(dir)s" % c)
+            local("docker build --build-arg repo=https://github.com/mike-love/will --build-arg branch=release/personal %(ctagname)s %(dir)s" % c)
 
 
 def docker_tag():
