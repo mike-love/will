@@ -3,22 +3,24 @@ sudo: false
 dist: trusty
 group: deprecated-2017Q4
 services:
-    - docker
-
-#block other builds
+- docker
 branches:
-    only:
-        - release/personal
+  only:
+  - release/personal
 install:
 - pip install -U tox
 - pip install -r will/requirements/dev.txt
 script:
 - tox
 - export CTAG="-$TRAVIS_COMMIT"
-- "fab docker_build"
+- fab docker_build
 deploy:
   skip_cleanup: true
   provider: script
-  script: "fab docker_deploy"
+  script: fab docker_deploy
   on:
     branch: release/personal
+env:
+  global:
+  - secure: CrRNqhGdVwmwNa9HY8RXEQg6y/yWaexQdgmh4dh+7n35vjLpIU5Q3jRggeqXm9nMRh3DELzlWpQiayOfjcf0/GiAfnjnbPg0NpUJ6gHOkgnOM/l7pWATSI5biudSv9yqOzGAbGuqaUtr/jv44MuUfCQGYDXDVZ/cVbnJsFTFJuvnvnznE8Rs8E3XC4wPeeFSiFdVT8/JASYrnX5rG2pQtQNxeIbHDW+THPO4JnhS0OAE2NBm8skOfulPQK8D+qCsgEE+xKERDrNUPUhvyzGacTh/x8YzJemjlwEw4WclKdgYEFbpt7Ymieno/mKBbovzxv9lQ/90Cis+9hnBCoB+2KsV4D5YU3TJZUgEcjEFhSr4KNzFPnJBwvp/jZBuUg6WcEOo9VP30UYINx4ZllIoWcJixSWiqniaOHKCsaZEL9kgmXcpAIbwsK9U6eyqy5Iksfb8fP41DY8U9XkBXnBCvD5gTC6R06fRujOP7NNoIvos3W49YbZVPtkbnAzee+QBb05sjxtwWf1AAt9SAxY4hwMqpBBAl42Kq/ymZ/5Fr/m2RRnnLUhhr/wkR+I5Fh6IKk4wmZnrU62n+sZVR3Zj6uqhA2QLVoDTdx6iuuAzFbvEKFZMR0ULsgK0G1h8AgER61YSVZsdyjypbxHQ+0PyGU4CzNSMaT1NJ9OatxAfdrw=
+  - secure: FoWmFFka1cML5Oc2peGlOuIykPZ+z4+Y+J9mVl/re9HTcRfJo/oWzwhsNoH+Eet669iXYqRKorstDaZp5aL4C8vw680IouoUfvEOtZdVXmT9Z12EpOzc0mWWm35uRMfyfRVy6T7h8uq4ixu9sIup/97GuKyfeg0E/FFS2T6YDNAFwWkL0CZgCch5en9x+Biuq7RvCjdHU84wBqBPbBgjU6y+Yw7/ZwwZdjcvQ2SK6H0ROd01/aD9wM585lLMGeSEK4mRbIJSpkLxGVg4RlWVXhwClfmIRYHr1XA784tfRt9hZYXLLv/BbhU9r+/fbIRGlrMkGhmSGcDzYBfZdiCxqYDzFQjrkalyx/i2lDcpBTdknjw5JVpzP7dOx+oQHJrS7A3hpwS+Jy7fcHTfyD3tQ8fTdNM1ttxB8CaPbWL80iL/w9XMsJEL9HdF0o4mqYRhJWmbQRQkBZv8Edw9CQWp2Sm2FeI3XSWGHbiGnjYQzyK/BWYouovFEukKKSvOSx/FQ15gzJ2w0JfIcVNStbtRnkd0+0PkVpyHVxHj9m/NxsWgDQUTySG6vuQiuzldh4JcfuVh4c2/IbqHGJ17N/NgNKIeA9QOaAZ7aa8TyM/6PCqvNTr5kFfTZYwm/Xe+S9BtCKvKgDbqp29sBEUNnOE0oDAD0W/FfWvoZlO6TGSH3vA=
