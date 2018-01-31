@@ -1,5 +1,7 @@
 language: python
 sudo: false
+dist: trusty
+group: deprecated-2017Q4
 services:
     - docker
 
@@ -20,6 +22,3 @@ deploy:
   script: "fab docker_deploy"
   on:
     branch: release/personal
-env:
-  matrix:
-    secure: 
