@@ -35,7 +35,7 @@ def docker_tag():
     with lcd(DOCKER_PATH):
 
         local("docker tag %(ctagname)s mlove/will:latest" %
-              filter(lambda x: x["default"], DOCKER_BUILDS))
+              filter(lambda x: x["production"], DOCKER_BUILDS))
 
 
 def docker_push():
