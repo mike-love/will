@@ -32,10 +32,10 @@ def docker_build():
 
 def docker_tag():
     print("Building Docker Releases...")
-    with lcd(DOCKER_PATH):
 
-        local("docker tag %(ctagname)s mlove/will:latest" %
-              filter(lambda x: x["production"], DOCKER_BUILDS))
+    for c in filter(lambda x: x["production"], DOCKER_BUILDS):
+        with lcd(DOCKER_PATH):
+            local("docker tag %(ctagname)s mlove/will:latest" % c)
 
 
 def docker_push():
