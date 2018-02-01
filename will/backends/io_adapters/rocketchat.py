@@ -329,7 +329,7 @@ class RocketChatBackend(IOBackend, StorageMixin):
 
             total = resp_json['total']
             for member in resp_json['members']:
-                members[member['userid']] = member
+                members[member['username']] = member
 
             passes += 1
             fetched = count * passes
