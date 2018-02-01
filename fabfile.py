@@ -35,7 +35,7 @@ def docker_tag():
     with lcd(DOCKER_PATH):
 
         local("docker tag %(ctagname)s mlove/will:latest" %
-                filter(lambda x: x["default"], DOCKER_BUILDS))
+              filter(lambda x: x["default"], DOCKER_BUILDS))
 
 
 def docker_push():
@@ -43,8 +43,9 @@ def docker_push():
     with lcd(DOCKER_PATH):
         local("docker login -u $DOCKER_USER -p $DOCKER_PASS")
         for c in DOCKER_BUILDS:
-            local("docker push %(ctagname)s" %c)
+            local("docker push %(ctagname)s" % c)
         local("docker push mlove/will:latest")
+
 
 def docker_deploy():
     docker_build()
