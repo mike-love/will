@@ -308,6 +308,34 @@ class RocketChatBackend(IOBackend, StorageMixin):
             if data['handle'] == username:
                 return id
 
+    def _rest_channel_memebers(self, roomId):
+        logging.debug('Getting memebers from %(room)s', roomId)
+
+        headers = {'X-Auth-Token': self.token,
+                   'X-User-Id': self.userid}
+        params = {'roomId': roomId}
+
+        count = 50
+        passes = 0
+        fetched = 0
+        total = 0
+        members = {}
+        while fetched <= total:
+
+            r = requests.get('{}channels.members'.format(self.rocketchat_api_url),
+                             headers=headers, params=params)
+
+            resp_json = r.json()
+
+            total = resp_json['total']
+            for member in resp_json['members']:
+                members[member['userid']] = member
+
+            passes += 1
+            fetched = count * passes
+
+        return members
+
     def _rest_channels_list(self):
         logging.debug('Getting channel list from Rocket.Chat')
 
@@ -329,10 +357,7 @@ class RocketChatBackend(IOBackend, StorageMixin):
             total = resp_json['total']
 
             for channel in resp_json['channels']:
-                members = {}
-                for username in channel['usernames']:
-                    userid = self._get_userid_from_username(username)
-                    members[userid] = self.people[userid]
+                members = self._rest_channel_members(channel['_id'])
 
                 channels[channel['_id']] = Channel(
                     id=channel['_id'],
