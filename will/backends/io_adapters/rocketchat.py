@@ -308,7 +308,7 @@ class RocketChatBackend(IOBackend, StorageMixin):
             if data['handle'] == username:
                 return id
 
-    def _rest_channel_memebers(self, roomId):
+    def _rest_channel_members(self, roomId):
         logging.debug('Getting memebers from %(room)s', roomId)
 
         headers = {'X-Auth-Token': self.token,
