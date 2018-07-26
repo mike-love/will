@@ -1,5 +1,44 @@
 # Releases
 
+#### 2.1.3 - June 13, 2018
+
+Bugfix & feature release that includes:
+
+Bugfixes: 
+* Will is now robust against slack disconnects, and automatically handles reconnects, thanks to [https://github.com/Ashex](Ashex)!
+* Will also now doesn't respond to every single message when he joins a new channel. Please send your thank-you cards to [https://github.com/Ashex](Ashex). 
+* Makes will more robust at handling incorrect channel names in slack, thanks to [reist](https://github.com/reist).
+* Properly renames `SLACK_DEFAULT_ROOM` to `SLACK_DEFAULT_CHANNEL` (with backwards-compatability) thanks (again!) to [reist](https://github.com/reist).
+* Enable/disable backends from `generate_will_project` now properly puts the comment outside the strong.  Thanks to [phiro69](https://github.com/phiro69) for the report.
+
+
+New features:
+* Adds support for slack attachments, thanks to [https://github.com/Ashex](Ashex)
+* Reminders now notify the person making the reminder, thanks to [unicolet](https://github.com/unicolet).
+* `generate_will_project` now supports a `--backends` flag, thanks to [wontonst](https://github.com/wontonst).
+* Will now explicitly notes if he's automagically using `REDIS_URL` to find the redis backend.
+
+#### 2.1.2 - March 30, 2018
+
+Bugfix release that includes:
+
+* Fixes python 2 compatability (`str` instead of `basestring`) for the HipChat adapter, thanks to [wontonst](https://github.com/wontonst).
+
+
+#### 2.1.1 - March 22, 2018
+
+Bugfix release that includes:
+
+* Fixes slack reconnect issues, thanks to [@mattcl](https://github.com/mattcl).  Props to [@cmachine](https://github.com/cmachine) for also submitting a fix.
+* Saying "G" will no longer give you a picture of a pug, using the default settings. This is both tragic, and necessary. (Actual fix: adjusted default fuziness settings.  If you have the fuzzy backend on, and were seeing the rather hilarious/annoying [#327](https://github.com/skoczen/will/issues/327), set `FUZZY_MINIMUM_MATCH_CONFIDENCE = 91` in your config.py)
+* Programmer help is working again, thanks to [@acommasplice](https://github.com/acommasplice).
+* Fixes word game to work in python 3 thanks to [@netjunki](https://github.com/netjunki), and [ptomkiel-oktawave](https://github.com/ptomkiel-oktawave)'s report.
+* Fixes up chat room rosters in HipChat with rosters > 1000 rooms, thanks to [@ostracon](https://github.com/ostracon)
+* Fixes `get_room_from_message`, thanks to [@TaunoTinits](https://github.com/TaunoTinits)'s fix and  [ptomkiel-oktawave](https://github.com/ptomkiel-oktawave)'s report.
+* Fixes an error that could occur on incoming webhooks on hipchat.  Thanks to [ptomkiel-oktawave](https://github.com/ptomkiel-oktawave) and others for a report.
+* Fixes Will incorrectly talking to the main slack room, when he's directly addressed in 1-1 with something he doesn't know how to do.  Thanks to [netjunki](https://github.com/netjunki) for the report!
+
+
 #### 2.1.0 - November 28, 2017
 
 Planned release that includes:

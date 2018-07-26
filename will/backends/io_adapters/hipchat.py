@@ -213,7 +213,7 @@ class HipChatRoomMixin(object):
         return None
 
     def get_room_from_message(self, message):
-        return self.get_room_by_jid(message.getMucroom())
+        return self.get_room_from_name_or_id(message.data.channel.name)
 
     def get_room_from_name_or_id(self, name_or_id):
         for name, room in self.available_rooms.items():
@@ -255,6 +255,7 @@ class HipChatXMPPClient(ClientXMPP, HipChatRosterMixin, HipChatRoomMixin, Storag
             "server": settings.HIPCHAT_SERVER,
             "token": settings.HIPCHAT_V2_TOKEN,
         }
+
         r = requests.get(my_user_url, **settings.REQUESTS_OPTIONS)
         resp = r.json()
         if "email" in resp:
@@ -605,7 +606,7 @@ class HipChatBackend(IOBackend, HipChatRosterMixin, HipChatRoomMixin, StorageMix
                 r = requests.get(url, **settings.REQUESTS_OPTIONS)
 
                 for room in r.json()['items']:
-                    all_rooms["%s" % (room['id'],)] = Channel(
+                    all_rooms["%s" % (room['xmpp_jid'],)] = Channel(
                         id=room["id"],
                         name=room["name"],
                         source=clean_for_pickling(room),
@@ -641,7 +642,7 @@ class HipChatBackend(IOBackend, HipChatRosterMixin, HipChatRoomMixin, StorageMix
             if interpolated_handle in event["body"]:
                 will_is_mentioned = True
 
-            if sender.id == self.me.id:
+            if sender and self.me and sender.id == self.me.id:
                 will_said_it = True
 
             m = Message(
@@ -679,7 +680,7 @@ class HipChatBackend(IOBackend, HipChatRosterMixin, HipChatRoomMixin, StorageMix
             passed_room = kwargs["channel"]
 
         if passed_room:
-            if isinstance(passed_room, basestring):
+            if isinstance(passed_room, str):
                 # User passed in a room string
                 room = self.get_room_from_name_or_id(passed_room)
             else:

@@ -138,6 +138,7 @@ def import_settings(quiet=True):
             "NAME": "HIPCHAT_NAME",
             "HANDLE": "HIPCHAT_HANDLE",
             "DEFAULT_ROOM": "HIPCHAT_DEFAULT_ROOM",
+            "SLACK_DEFAULT_ROOM": "SLACK_DEFAULT_CHANNEL",
         }
         deprecation_warn_shown = False
         for k, v in DEPRECATED_BUT_MAPPED_SETTINGS.items():
@@ -295,6 +296,10 @@ IO_BACKENDS = "
         if settings["STORAGE_BACKEND"] == "redis" or settings["PUBSUB_BACKEND"] == "redis":
             if "REDIS_URL" not in settings:
                 # For heroku
+                if "REDIS_URL" in os.environ:
+                    settings["REDIS_URL"] = os.environ["REDIS_URL"]
+                    if not quiet:
+                        note("WILL_REDIS_URL not set, but it appears you're using Heroku Redis or another standard REDIS_URL. If so, all good.")
                 if "REDISCLOUD_URL" in os.environ:
                     settings["REDIS_URL"] = os.environ["REDISCLOUD_URL"]
                     if not quiet:
@@ -418,7 +423,7 @@ IO_BACKENDS = "
                     os.environ["WILL_EPHEMERAL_SECRET_KEY"] = "True"
 
         if "FUZZY_MINIMUM_MATCH_CONFIDENCE" not in settings:
-            settings["FUZZY_MINIMUM_MATCH_CONFIDENCE"] = 90
+            settings["FUZZY_MINIMUM_MATCH_CONFIDENCE"] = 91
         if "FUZZY_REGEX_ALLOWABLE_ERRORS" not in settings:
             settings["FUZZY_REGEX_ALLOWABLE_ERRORS"] = 3
 

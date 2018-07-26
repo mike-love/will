@@ -1,7 +1,7 @@
 import os
 import tempfile
-from will import VERSION
 from fabric.api import *
+from will import VERSION
 
 SITE_DIR = "site"
 WHITELIST_DIRS = [".git", ]
@@ -14,17 +14,17 @@ CTAG = os.environ.get("CTAG", "")
 
 DOCKER_BUILDS = [
     {
-        "ctagname": "heywill/will:python2.7%(CTAG)s" % os.environ,
+        "ctagname": "heywill/will:python2.7%s" % CTAG,
         "name": "heywill/will:python2.7" % os.environ,
         "dir": "will/will-py2/",
     },
     {
-        "ctagname": "heywill/will:python2.7%(CTAG)s" % os.environ,
+        "ctagname": "heywill/will:python2.7%s" % CTAG,
         "name": "heywill/will:latest" % os.environ,
         "dir": "will/will-py2/",
     },
     {
-        "ctagname": "heywill/will:python3.7%(CTAG)s" % os.environ,
+        "ctagname": "heywill/will:python3.7%s" % CTAG,
         "name": "heywill/will:python3.7" % os.environ,
         "dir": "will/will-py3/",
     },
@@ -47,6 +47,7 @@ def upload_release():
     local("python setup.py sdist upload")
 
 
+@task
 def release():
     deploy_docs()
     upload_release()
@@ -89,8 +90,7 @@ def deploy_docs():
                     os.remove(os.path.join(root, name))
 
     local("cp -rv %s/* ." % tempdir)
-    with settings(warn_only=True):
-        result = local("git diff --exit-code")
+    result = local("git diff --exit-code", warn_only=True)
 
     if result.return_code != 0:
         local("git add -A .")
@@ -101,18 +101,19 @@ def deploy_docs():
     local("git checkout %s" % current_branch)
 
 
+@task
 def docker_build():
     print("Building Docker Images...")
     with lcd(DOCKER_PATH):
-        for c in DOCKER_BUILDS:
-            local("docker build -t %(ctagname)s %(dir)s" % c)
+        for b in DOCKER_BUILDS:
+            local("docker build -t %(ctagname)s %(dir)s" % b)
 
 
 def docker_tag():
     print("Building Docker Releases...")
     with lcd(DOCKER_PATH):
-        for c in DOCKER_BUILDS:
-            local("docker tag %(ctagname)s %(name)s" % c)
+        for b in DOCKER_BUILDS:
+            local("docker tag %(ctagname)s %(name)s" % b)
 
 
 def docker_push():
@@ -124,6 +125,7 @@ def docker_push():
         local("docker push heywill/will:latest")
 
 
+@task
 def docker_deploy():
     docker_build()
     docker_tag()

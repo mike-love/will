@@ -6,6 +6,7 @@ import requests
 import sys
 import time
 import traceback
+from websocket import WebSocketConnectionClosedException
 
 from markdownify import MarkdownConverter
 
@@ -16,6 +17,7 @@ from will.mixins import SleepMixin, StorageMixin
 from multiprocessing import Process
 from will.abstractions import Event, Message, Person, Channel
 from slackclient import SlackClient
+from slackclient.server import SlackConnectionError
 
 SLACK_SEND_URL = "https://slack.com/api/chat.postMessage"
 SLACK_SET_TOPIC_URL = "https://slack.com/api/channels.setTopic"
@@ -94,7 +96,7 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
             # If the parent thread is a 1-1 between Will and I, also treat that as direct.
             # Since members[] still comes in on the thread event, we can trust this, even if we're
             # in a thread.
-            if len(channel.members.keys()) == 0:
+            if channel.id == channel.name:
                 is_private_chat = True
 
             # <@U5GUL9D9N> hi
@@ -172,21 +174,29 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
             else:
                 # Came from webhook/etc
                 # TODO: finish this.
-                if "room" in kwargs:
-                    event.channel = self.get_channel_from_name(kwargs["room"])
-                elif "channel" in kwargs:
-                    event.channel = self.get_channel_from_name(kwargs["channel"])
-                else:
-                    if hasattr(settings, "SLACK_DEFAULT_ROOM"):
-                        event.channel = self.get_channel_from_name(settings.SLACK_DEFAULT_ROOM)
+                target_channel = kwargs.get("room", kwargs.get("channel", None))
+                if target_channel:
+                    event.channel = self.get_channel_from_name(target_channel)
+                    if event.channel:
+                        self.send_message(event)
                     else:
-                        # Set self.me
-                        self.people
-                        for c in self.channels.values():
-                            if c.name != c.id and self.me.id in c.members:
-                                event.channel = c
-                                break
-                self.send_message(event)
+                        logging.error(
+                            "I was asked to post to the slack %s channel, but it doesn't exist.",
+                            target_channel
+                        )
+                        if self.default_channel:
+                            event.channel = self.get_channel_from_name(self.default_channel)
+                            event.content = event.content + " (for #%s)" % target_channel
+                            self.send_message(event)
+
+                elif self.default_channel:
+                    event.channel = self.get_channel_from_name(self.default_channel)
+                    self.send_message(event)
+                else:
+                    logging.critical(
+                        "I was asked to post to a slack default channel, but I'm nowhere."
+                        "Please invite me somewhere with '/invite @%s'", self.me.handle
+                    )
 
         if event.type in ["topic_change", ]:
             self.set_topic(event)
@@ -250,7 +260,7 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
 
             try:
                 # If we're starting a thread
-                if "start_thread" in event.kwargs and event.kwargs["start_thread"] and ("thread_ts" not in data or not data["thread_ts"]):
+                if "kwargs" in event and "start_thread" in event.kwargs and event.kwargs["start_thread"] and ("thread_ts" not in data or not data["thread_ts"]):
                     if hasattr(event.source_message, "original_incoming_event"):
                         data.update({
                             "thread_ts": event.source_message.original_incoming_event["ts"]
@@ -270,10 +280,16 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
                             "thread_ts": event.source_message.data.original_incoming_event["ts"]
                         })
                 else:
-                    data.update({
-                        "thread_ts": event.data["original_incoming_event"].data.thread
-                    })
+                    if hasattr(event.data.original_incoming_event, "thread_ts"):
+                        data.update({
+                            "thread_ts": event.data.original_incoming_event.thread_ts
+                        })
+                    elif "thread" in event.data.original_incoming_event.data:
+                        data.update({
+                            "thread_ts": event.data.original_incoming_event.data.thread
+                        })
             except:
+                logging.info(traceback.format_exc().split(" ")[-1])
                 pass
         data.update({
             "channel": channel_id,
@@ -295,6 +311,11 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
                             "text": event.content,
                         }
                     ]),
+                })
+            elif "attachments" in event.kwargs:
+                data.update({
+                    "text": event.content,
+                    "attachments": json.dumps(event.kwargs["attachments"])
                 })
             else:
                 data.update({
@@ -359,6 +380,12 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
         return self._people
 
     @property
+    def default_channel(self):
+        if not hasattr(self, "_default_channel") or not self._default_channel:
+            self._decide_default_channel()
+        return self._default_channel
+
+    @property
     def channels(self):
         if not hasattr(self, "_channels") or self._channels is {}:
             self._update_channels()
@@ -369,6 +396,33 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
         if not hasattr(self, "_client"):
             self._client = SlackClient(settings.SLACK_API_TOKEN)
         return self._client
+
+    def _decide_default_channel(self):
+        self._default_channel = None
+        if not hasattr(self, "complained_about_default"):
+            self.complained_about_default = False
+            self.complained_uninvited = False
+
+        # Set self.me
+        self.people
+
+        if hasattr(settings, "SLACK_DEFAULT_CHANNEL"):
+            channel = self.get_channel_from_name(settings.SLACK_DEFAULT_CHANNEL)
+            if channel:
+                if self.me.id in channel.members:
+                    self._default_channel = channel.id
+                    return
+            elif not self.complained_about_default:
+                self.complained_about_default = True
+                logging.error("The defined default channel(%s) does not exist!",
+                              settings.SLACK_DEFAULT_CHANNEL)
+
+        for c in self.channels.values():
+            if c.name != c.id and self.me.id in c.members:
+                self._default_channel = c.id
+        if not self._default_channel and not self.complained_uninvited:
+            self.complained_uninvited = True
+            logging.critical("No channels with me invited! No messages will be sent!")
 
     def _update_channels(self):
         channels = {}
@@ -438,31 +492,36 @@ class SlackBackend(IOBackend, SleepMixin, StorageMixin):
         self._update_channels()
 
     def _watch_slack_rtm(self):
-        try:
-            if self.client.rtm_connect():
-                self._update_backend_metadata()
+        while True:
+            try:
+                if self.client.rtm_connect(auto_reconnect=True):
+                    self._update_backend_metadata()
 
-                num_polls_between_updates = 30 / settings.EVENT_LOOP_INTERVAL  # Every 30 seconds
-                current_poll_count = 0
-                while True:
-                    events = self.client.rtm_read()
-                    if len(events) > 0:
-                        # TODO: only handle events that are new.
-                        # print(len(events))
-                        for e in events:
-                            self.handle_incoming_event(e)
+                    num_polls_between_updates = 30 / settings.EVENT_LOOP_INTERVAL  # Every 30 seconds
+                    current_poll_count = 0
+                    while True:
+                        events = self.client.rtm_read()
+                        if len(events) > 0:
+                            # TODO: only handle events that are new.
+                            # print(len(events))
+                            for e in events:
+                                self.handle_incoming_event(e)
 
-                    # Update channels/people/me/etc every 10s or so.
-                    current_poll_count += 1
-                    if current_poll_count > num_polls_between_updates:
-                        self._update_backend_metadata()
-                        current_poll_count = 0
+                        # Update channels/people/me/etc every 10s or so.
+                        current_poll_count += 1
+                        if current_poll_count > num_polls_between_updates:
+                            self._update_backend_metadata()
+                            current_poll_count = 0
 
-                    self.sleep_for_event_loop()
-        except (KeyboardInterrupt, SystemExit):
-            pass
-        except:
-            logging.critical("Error in watching slack RTM: \n%s" % traceback.format_exc())
+                        self.sleep_for_event_loop()
+            except (WebSocketConnectionClosedException, SlackConnectionError):
+                logging.error('Encountered connection error attempting reconnect in 2 seconds')
+                time.sleep(2)
+            except (KeyboardInterrupt, SystemExit):
+                break
+            except:
+                logging.critical("Error in watching slack RTM: \n%s" % traceback.format_exc())
+                break
 
     def bootstrap(self):
         # Bootstrap must provide a way to to have:

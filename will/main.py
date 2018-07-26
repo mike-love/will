@@ -441,6 +441,7 @@ To set your %(name)s:
                     ):
                         c = cls(bot=self)
                         self.execution_backends.append(c)
+                        show_valid("Execution: %s Backend started." % cls.__name__)
                 except ImportError as e:
                     error_message = (
                         "Execution backend %s is missing. Please either remove it \nfrom config.py "
@@ -1095,5 +1096,5 @@ To set your %(name)s:
                                 show_valid(plugin_name)
                 except Exception as e:
                     self.startup_error("Error bootstrapping %s" % (plugin_info["class"],), e)
-
+            self.save("all_listener_regexes", self.all_listener_regexes)
         puts("")
